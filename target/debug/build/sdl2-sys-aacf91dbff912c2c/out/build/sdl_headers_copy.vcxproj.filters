@@ -1,0 +1,248 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_assert.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_atomic.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_audio.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_bits.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_blendmode.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_clipboard.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_copying.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_cpuinfo.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_egl.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_endian.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_error.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_events.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_filesystem.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_gamecontroller.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_gesture.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_guid.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_haptic.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_hidapi.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_hints.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_joystick.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_keyboard.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_keycode.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_loadso.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_locale.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_log.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_main.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_messagebox.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_metal.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_misc.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_mouse.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_mutex.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_name.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_opengl.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_opengl_glext.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_opengles.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_opengles2.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_opengles2_gl2.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_opengles2_gl2ext.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_opengles2_gl2platform.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_opengles2_khrplatform.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_pixels.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_platform.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_power.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_quit.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_rect.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_render.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_rwops.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_scancode.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_sensor.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_shape.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_stdinc.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_surface.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_system.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_syswm.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_test.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_test_assert.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_test_common.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_test_compare.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_test_crc32.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_test_font.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_test_fuzzer.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_test_harness.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_test_images.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_test_log.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_test_md5.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_test_memory.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_test_random.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_thread.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_timer.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_touch.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_types.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_version.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_video.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\SDL_vulkan.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\begin_code.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\7abb7bba73f69ccf0d6e10c58fbd376a\close_code.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\4ebd8645b0147e5d089b5322da5e2674\sdl_headers_copy.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Admin\.cargo\registry\src\index.crates.io-6f17d22bba15001f\sdl2-sys-0.36.0\SDL\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="D:\MEGA\rust-ecs\target\debug\build\sdl2-sys-aacf91dbff912c2c\out\build\CMakeFiles\sdl_headers_copy" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{1BD71918-8415-3DEA-8455-3A4347282F7B}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

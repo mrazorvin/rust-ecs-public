@@ -1,0 +1,239 @@
+{
+	"name": "test_isometric_map",
+	"width": 1920,
+	"height": 1080,
+	"atlas": [
+		{
+			"x": 0,
+			"y": 0,
+			"width": 64,
+			"height": 128,
+			"relative_x": 0,
+			"relative_y": 1,
+			"image": "Column_5"
+		},
+		{
+			"x": 65,
+			"y": 0,
+			"width": 65,
+			"height": 66,
+			"relative_x": 1,
+			"relative_y": 0,
+			"image": "Grid"
+		},
+		{
+			"x": 131,
+			"y": 0,
+			"width": 64,
+			"height": 64,
+			"relative_x": 0,
+			"relative_y": 1,
+			"image": "Floor_Lower_3"
+		}
+	],
+	"tiles": [
+		{
+			"x": 260,
+			"y": 618,
+			"width": 66,
+			"height": 66,
+			"atlas_id": 1
+		},
+		{
+			"x": 292,
+			"y": 650,
+			"width": 66,
+			"height": 66,
+			"atlas_id": 1
+		},
+		{
+			"x": 325,
+			"y": 683,
+			"width": 66,
+			"height": 66,
+			"atlas_id": 1
+		},
+		{
+			"x": 227,
+			"y": 585,
+			"width": 66,
+			"height": 66,
+			"atlas_id": 1
+		},
+		{
+			"x": 357,
+			"y": 715,
+			"width": 66,
+			"height": 66,
+			"atlas_id": 1
+		},
+		{
+			"x": 390,
+			"y": 683,
+			"width": 66,
+			"height": 66,
+			"atlas_id": 1
+		},
+		{
+			"x": 195,
+			"y": 552,
+			"width": 66,
+			"height": 67,
+			"atlas_id": 1
+		},
+		{
+			"x": 227,
+			"y": 520,
+			"width": 66,
+			"height": 66,
+			"atlas_id": 2
+		},
+		{
+			"x": 260,
+			"y": 487,
+			"width": 66,
+			"height": 66,
+			"atlas_id": 2
+		},
+		{
+			"x": 292,
+			"y": 455,
+			"width": 66,
+			"height": 66,
+			"atlas_id": 1
+		},
+		{
+			"x": 422,
+			"y": 650,
+			"width": 66,
+			"height": 66,
+			"atlas_id": 1
+		},
+		{
+			"x": 455,
+			"y": 618,
+			"width": 66,
+			"height": 66,
+			"atlas_id": 1
+		},
+		{
+			"x": 325,
+			"y": 487,
+			"width": 66,
+			"height": 66,
+			"atlas_id": 1
+		},
+		{
+			"x": 357,
+			"y": 520,
+			"width": 66,
+			"height": 66,
+			"atlas_id": 1
+		},
+		{
+			"x": 390,
+			"y": 552,
+			"width": 66,
+			"height": 67,
+			"atlas_id": 1
+		},
+		{
+			"x": 422,
+			"y": 585,
+			"width": 66,
+			"height": 66,
+			"atlas_id": 1
+		},
+		{
+			"x": 260,
+			"y": 553,
+			"width": 65,
+			"height": 65,
+			"atlas_id": 2
+		},
+		{
+			"x": 293,
+			"y": 520,
+			"width": 65,
+			"height": 65,
+			"atlas_id": 2
+		},
+		{
+			"x": 293,
+			"y": 584,
+			"width": 65,
+			"height": 65,
+			"atlas_id": 2
+		},
+		{
+			"x": 324,
+			"y": 553,
+			"width": 65,
+			"height": 65,
+			"atlas_id": 2
+		},
+		{
+			"x": 325,
+			"y": 616,
+			"width": 65,
+			"height": 65,
+			"atlas_id": 2
+		},
+		{
+			"x": 357,
+			"y": 584,
+			"width": 65,
+			"height": 65,
+			"atlas_id": 2
+		},
+		{
+			"x": 389,
+			"y": 616,
+			"width": 65,
+			"height": 65,
+			"atlas_id": 2
+		},
+		{
+			"x": 293,
+			"y": 391,
+			"width": 65,
+			"height": 129,
+			"atlas_id": 0
+		},
+		{
+			"x": 454,
+			"y": 555,
+			"width": 65,
+			"height": 129,
+			"atlas_id": 0
+		},
+		{
+			"x": 357,
+			"y": 648,
+			"width": 65,
+			"height": 65,
+			"atlas_id": 2
+		},
+		{
+			"x": 196,
+			"y": 489,
+			"width": 65,
+			"height": 129,
+			"atlas_id": 0
+		},
+		{
+			"x": 196,
+			"y": 489,
+			"width": 65,
+			"height": 129,
+			"atlas_id": 0
+		},
+		{
+			"x": 358,
+			"y": 651,
+			"width": 65,
+			"height": 129,
+			"atlas_id": 0
+		}
+	]
+}

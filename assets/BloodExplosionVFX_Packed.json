@@ -1,0 +1,164 @@
+{
+  "size": 2048,
+  "spreadsheet": "./BloodExplosionVFX_Packed.png",
+  "tile_width": 512,
+  "tile_height": 512,
+  "tiles": {
+    "effect": {
+      "effect": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 144,
+          "height": 175,
+          "relative_x": 190,
+          "relative_y": 166
+        },
+        {
+          "x": 144,
+          "y": 0,
+          "width": 153,
+          "height": 189,
+          "relative_x": 184,
+          "relative_y": 161
+        },
+        {
+          "x": 297,
+          "y": 0,
+          "width": 206,
+          "height": 216,
+          "relative_x": 152,
+          "relative_y": 142
+        },
+        {
+          "x": 503,
+          "y": 0,
+          "width": 222,
+          "height": 227,
+          "relative_x": 148,
+          "relative_y": 139
+        },
+        {
+          "x": 725,
+          "y": 0,
+          "width": 251,
+          "height": 254,
+          "relative_x": 128,
+          "relative_y": 128
+        },
+        {
+          "x": 976,
+          "y": 0,
+          "width": 297,
+          "height": 271,
+          "relative_x": 103,
+          "relative_y": 118
+        },
+        {
+          "x": 1273,
+          "y": 0,
+          "width": 337,
+          "height": 303,
+          "relative_x": 83,
+          "relative_y": 105
+        },
+        {
+          "x": 1610,
+          "y": 0,
+          "width": 377,
+          "height": 323,
+          "relative_x": 63,
+          "relative_y": 96
+        },
+        {
+          "x": 0,
+          "y": 323,
+          "width": 322,
+          "height": 343,
+          "relative_x": 95,
+          "relative_y": 80
+        },
+        {
+          "x": 322,
+          "y": 323,
+          "width": 345,
+          "height": 363,
+          "relative_x": 85,
+          "relative_y": 66
+        },
+        {
+          "x": 667,
+          "y": 323,
+          "width": 367,
+          "height": 363,
+          "relative_x": 79,
+          "relative_y": 76
+        },
+        {
+          "x": 1034,
+          "y": 323,
+          "width": 379,
+          "height": 377,
+          "relative_x": 82,
+          "relative_y": 69
+        },
+        {
+          "x": 1413,
+          "y": 323,
+          "width": 400,
+          "height": 391,
+          "relative_x": 76,
+          "relative_y": 60
+        },
+        {
+          "x": 0,
+          "y": 714,
+          "width": 419,
+          "height": 401,
+          "relative_x": 69,
+          "relative_y": 50
+        },
+        {
+          "x": 419,
+          "y": 714,
+          "width": 435,
+          "height": 394,
+          "relative_x": 63,
+          "relative_y": 41
+        },
+        {
+          "x": 854,
+          "y": 714,
+          "width": 448,
+          "height": 408,
+          "relative_x": 56,
+          "relative_y": 32
+        },
+        {
+          "x": 1302,
+          "y": 714,
+          "width": 427,
+          "height": 371,
+          "relative_x": 50,
+          "relative_y": 54
+        },
+        {
+          "x": 0,
+          "y": 1122,
+          "width": 430,
+          "height": 381,
+          "relative_x": 52,
+          "relative_y": 52
+        },
+        {
+          "x": 430,
+          "y": 1122,
+          "width": 407,
+          "height": 382,
+          "relative_x": 51,
+          "relative_y": 56
+        }
+      ]
+    }
+  }
+}

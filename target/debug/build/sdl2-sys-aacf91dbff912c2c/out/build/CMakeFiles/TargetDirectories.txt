@@ -1,0 +1,8 @@
+D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/CMakeFiles/sdl_headers_copy.dir
+D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/CMakeFiles/SDL2main.dir
+D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/CMakeFiles/SDL2.dir
+D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/CMakeFiles/SDL2_test.dir
+D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/CMakeFiles/uninstall.dir
+D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/CMakeFiles/INSTALL.dir
+D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/CMakeFiles/ALL_BUILD.dir
+D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/CMakeFiles/ZERO_CHECK.dir

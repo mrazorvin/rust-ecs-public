@@ -1,0 +1,132 @@
+{
+	"spreadsheet": "./LaserVFXTopDown_Packed.png",
+	"tile_width": 712,
+	"tile_height": 256,
+	"size": 2048,
+	"tiles": {
+		"effect": {
+			"effect": [
+				{
+					"x": 0,
+					"y": 0,
+					"width": 86,
+					"height": 66,
+					"relative_x": 508,
+					"relative_y": 82
+				},
+				{
+					"x": 86,
+					"y": 0,
+					"width": 249,
+					"height": 86,
+					"relative_x": 355,
+					"relative_y": 72
+				},
+				{
+					"x": 335,
+					"y": 0,
+					"width": 421,
+					"height": 108,
+					"relative_x": 194,
+					"relative_y": 61
+				},
+				{
+					"x": 756,
+					"y": 0,
+					"width": 585,
+					"height": 113,
+					"relative_x": 35,
+					"relative_y": 60
+				},
+				{
+					"x": 1341,
+					"y": 0,
+					"width": 639,
+					"height": 149,
+					"relative_x": 0,
+					"relative_y": 43
+				},
+				{
+					"x": 0,
+					"y": 149,
+					"width": 658,
+					"height": 145,
+					"relative_x": 0,
+					"relative_y": 36
+				},
+				{
+					"x": 658,
+					"y": 149,
+					"width": 632,
+					"height": 160,
+					"relative_x": 0,
+					"relative_y": 38
+				},
+				{
+					"x": 1290,
+					"y": 149,
+					"width": 626,
+					"height": 170,
+					"relative_x": 0,
+					"relative_y": 20
+				},
+				{
+					"x": 0,
+					"y": 319,
+					"width": 646,
+					"height": 175,
+					"relative_x": 0,
+					"relative_y": 32
+				},
+				{
+					"x": 646,
+					"y": 319,
+					"width": 629,
+					"height": 176,
+					"relative_x": 0,
+					"relative_y": 29
+				},
+				{
+					"x": 1275,
+					"y": 319,
+					"width": 645,
+					"height": 170,
+					"relative_x": 0,
+					"relative_y": 37
+				},
+				{
+					"x": 0,
+					"y": 495,
+					"width": 646,
+					"height": 148,
+					"relative_x": 0,
+					"relative_y": 78
+				},
+				{
+					"x": 646,
+					"y": 495,
+					"width": 576,
+					"height": 47,
+					"relative_x": 0,
+					"relative_y": 83
+				},
+				{
+					"x": 1222,
+					"y": 495,
+					"width": 576,
+					"height": 32,
+					"relative_x": 0,
+					"relative_y": 98
+				},
+				{
+					"x": 0,
+					"y": 643,
+					"width": 566,
+					"height": 30,
+					"relative_x": 10,
+					"relative_y": 100
+				}
+			]
+		}
+	}
+}

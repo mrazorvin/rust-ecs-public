@@ -1,0 +1,788 @@
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_ASSERT.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_assert.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_assert.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_ATOMIC.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_atomic.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_atomic.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_AUDIO.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_audio.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_audio.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_BITS.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_bits.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_bits.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_BLENDMODE.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_blendmode.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_blendmode.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_CLIPBOARD.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_clipboard.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_clipboard.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_COPYING.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_copying.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_copying.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_CPUINFO.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_cpuinfo.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_cpuinfo.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_EGL.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_egl.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_egl.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_ENDIAN.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_endian.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_endian.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_ERROR.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_error.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_error.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_EVENTS.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_events.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_events.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_FILESYSTEM.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_filesystem.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_filesystem.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_GAMECONTROLLER.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_gamecontroller.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_gamecontroller.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_GESTURE.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_gesture.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_gesture.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_GUID.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_guid.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_guid.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_HAPTIC.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_haptic.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_haptic.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_HIDAPI.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_hidapi.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_hidapi.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_HINTS.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_hints.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_hints.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_JOYSTICK.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_joystick.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_joystick.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_KEYBOARD.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_keyboard.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_keyboard.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_KEYCODE.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_keycode.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_keycode.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_LOADSO.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_loadso.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_loadso.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_LOCALE.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_locale.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_locale.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_LOG.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_log.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_log.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_MAIN.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_main.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_main.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_MESSAGEBOX.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_messagebox.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_messagebox.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_METAL.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_metal.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_metal.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_MISC.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_misc.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_misc.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_MOUSE.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_mouse.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_mouse.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_MUTEX.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_mutex.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_mutex.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_NAME.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_name.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_name.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_OPENGL.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_opengl.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_opengl.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_OPENGL_GLEXT.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_opengl_glext.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_opengl_glext.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_OPENGLES.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_opengles.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_opengles.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_OPENGLES2.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_opengles2.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_opengles2.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_OPENGLES2_GL2.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_opengles2_gl2.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_opengles2_gl2.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_OPENGLES2_GL2EXT.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_opengles2_gl2ext.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_opengles2_gl2ext.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_OPENGLES2_GL2PLATFORM.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_opengles2_gl2platform.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_opengles2_gl2platform.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_OPENGLES2_KHRPLATFORM.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_opengles2_khrplatform.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_opengles2_khrplatform.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_PIXELS.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_pixels.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_pixels.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_PLATFORM.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_platform.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_platform.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_POWER.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_power.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_power.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_QUIT.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_quit.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_quit.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_RECT.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_rect.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_rect.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_RENDER.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_render.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_render.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_RWOPS.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_rwops.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_rwops.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_SCANCODE.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_scancode.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_scancode.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_SENSOR.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_sensor.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_sensor.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_SHAPE.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_shape.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_shape.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_STDINC.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_stdinc.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_stdinc.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_SURFACE.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_surface.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_surface.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_SYSTEM.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_system.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_system.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_SYSWM.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_syswm.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_syswm.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_TEST.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_test.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_test.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_TEST_ASSERT.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_test_assert.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_test_assert.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_TEST_COMMON.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_test_common.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_test_common.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_TEST_COMPARE.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_test_compare.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_test_compare.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_TEST_CRC32.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_test_crc32.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_test_crc32.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_TEST_FONT.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_test_font.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_test_font.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_TEST_FUZZER.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_test_fuzzer.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_test_fuzzer.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_TEST_HARNESS.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_test_harness.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_test_harness.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_TEST_IMAGES.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_test_images.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_test_images.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_TEST_LOG.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_test_log.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_test_log.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_TEST_MD5.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_test_md5.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_test_md5.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_TEST_MEMORY.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_test_memory.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_test_memory.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_TEST_RANDOM.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_test_random.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_test_random.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_THREAD.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_thread.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_thread.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_TIMER.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_timer.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_timer.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_TOUCH.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_touch.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_touch.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_TYPES.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_types.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_types.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_VERSION.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_version.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_version.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_VIDEO.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_video.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_video.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\SDL_VULKAN.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/SDL_vulkan.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/SDL_vulkan.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\BEGIN_CODE.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/begin_code.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/begin_code.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\7ABB7BBA73F69CCF0D6E10C58FBD376A\CLOSE_CODE.H.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different C:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL/include/close_code.h D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/include/close_code.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\MEGA\RUST-ECS\TARGET\DEBUG\BUILD\SDL2-SYS-AACF91DBFF912C2C\OUT\BUILD\CMAKEFILES\4EBD8645B0147E5D089B5322DA5E2674\SDL_HEADERS_COPY.RULE
+setlocal
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\ADMIN\.CARGO\REGISTRY\SRC\INDEX.CRATES.IO-6F17D22BBA15001F\SDL2-SYS-0.36.0\SDL\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Admin/.cargo/registry/src/index.crates.io-6f17d22bba15001f/sdl2-sys-0.36.0/SDL -BD:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build --check-stamp-file D:/MEGA/rust-ecs/target/debug/build/sdl2-sys-aacf91dbff912c2c/out/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

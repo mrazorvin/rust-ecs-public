@@ -1,0 +1,5 @@
+{
+    "editor.wordBasedSuggestions": "off",
+    "editor.quickSuggestionsDelay": 200,
+    "rust-analyzer.showUnlinkedFileNotification": false
+}
