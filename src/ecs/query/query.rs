@@ -43,13 +43,12 @@ macro_rules! query_ctx {
         let mut chunk_iter = crate::ecs::collections::sync_vec::ZipRangeIterator::new();
         $(let mut [<$type:lower _chunk>] = chunk_iter.add(
           &[<$type:lower _arch>].buckets,
-           [<$type:lower _arch>].min_relaxed(),
-           [<$type:lower _arch>].max_relaxed()
+           [<$type:lower _arch>].min_relaxed() / 64,
+           ([<$type:lower _arch>].max_relaxed() as f32 / 64.0).ceil() as usize
         );)*
 
         for mut chunk in chunk_iter {
           let entity_offset= chunk.bucket_index() * 64;
-
           $(let [<$type:lower _chunk>] = chunk.progress(&mut [<$type:lower _chunk>]);)*
           for i in chunk.complete() {
               $(#[allow(unused_mut)] let mut [<$type:lower _bucket>] = unsafe { $type.get_bucket([<$type:lower _arch>], std::mem::transmute(&[<$type:lower _chunk>][i])) };)*

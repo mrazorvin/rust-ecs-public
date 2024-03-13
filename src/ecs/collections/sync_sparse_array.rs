@@ -2,10 +2,7 @@ use std::{
     cell::UnsafeCell,
     fmt::Debug,
     mem::MaybeUninit,
-    sync::{
-        atomic::{AtomicBool, AtomicPtr, AtomicU32, AtomicU64, Ordering},
-        Mutex, RwLock,
-    },
+    sync::atomic::{AtomicBool, AtomicPtr, AtomicU32, AtomicU64, Ordering},
     usize,
 };
 
@@ -86,10 +83,11 @@ impl<T> SyncSparseArray<T> {
             None => {
                 let requested_index = (id as f32 / BUCKET_DENSITY as f32).ceil() as usize;
                 while self.buckets.size() <= requested_index {
-                    let bucket_ptr =
-                        Box::into_raw(Box::new(Bucket::new(get_bucket_index(id) as u32)));
-                    self.buckets
+                    let bucket_ptr = Box::into_raw(Box::new(Bucket::new(0)));
+                    let (_, len) = self
+                        .buckets
                         .push((AtomicU64::new(0), AtomicPtr::new(bucket_ptr)));
+                    unsafe { (*bucket_ptr).idx.store(len as u32 - 1, Ordering::Release) };
                 }
 
                 // sice requested bucket could be created by other thread,
@@ -302,7 +300,7 @@ impl<T> BucketRefMut<T> {
 impl<T> Drop for BucketRefMut<T> {
     fn drop(&mut self) {
         if unsafe { *self.bits != 0 } {
-            let idx = unsafe { (*self.bucket).idx as usize };
+            let idx = unsafe { (*self.bucket).idx.load(Ordering::Acquire) as usize };
             let min = (idx * BUCKET_DENSITY) as u32;
             let max = ((min as usize + BUCKET_DENSITY) - 1) as u32;
             if unsafe { min < (*self.array).min_existed_id.load(Ordering::Relaxed) } {
@@ -320,14 +318,13 @@ impl<T> Drop for BucketRefMut<T> {
                 };
             }
         }
-
         unsafe { (*self.bucket).guard.store(false, Ordering::Release) };
     }
 }
 
 pub struct Bucket<T> {
     guard: AtomicBool,
-    idx: u32,
+    idx: AtomicU32,
     pub slots: [MaybeUninit<T>; BUCKET_DENSITY],
 }
 
@@ -335,7 +332,7 @@ impl<T> Bucket<T> {
     fn new(idx: u32) -> Self {
         Self {
             guard: AtomicBool::new(false),
-            idx,
+            idx: AtomicU32::new(idx),
             slots: unsafe { MaybeUninit::zeroed().assume_init() },
         }
     }
@@ -517,7 +514,9 @@ fn sync_sparse_array_min_max() {
         assert_eq!(array.min_relaxed(), 0);
         assert_eq!(
             array.max_relaxed(),
-            ((id / 64) * BUCKET_DENSITY + BUCKET_DENSITY - 1)
+            ((id / 64) * BUCKET_DENSITY + BUCKET_DENSITY - 1),
+            "{}",
+            id
         );
     }
 }

@@ -33,7 +33,14 @@ fn create_data(
 
     for arch_id in 1..=archs_amount {
         for entity_id in 1..=components_per_arch {
-            Position.set(arch_id, entity_id, Position { x: entity_id as u32, y: entity_id as u32 });
+            Position.set(
+                arch_id,
+                entity_id,
+                Position {
+                    x: entity_id as u32,
+                    y: entity_id as u32,
+                },
+            );
             Hero.set(arch_id, entity_id, Hero { fame: u64::MAX });
         }
     }
