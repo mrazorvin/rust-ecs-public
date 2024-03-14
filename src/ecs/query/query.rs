@@ -74,6 +74,8 @@ macro_rules! query_ctx {
 #[allow(unused_imports)]
 pub(crate) use query_ctx;
 
+use crate::ecs::prelude::Components;
+
 // - cargo expand --tests --lib  query > main_gen.rs
 // - cargo miri nextest run --release -j4 --lib -- query
 // - cargo test --lib -Zpanic-abort-tests query -- --nocapture
@@ -86,11 +88,11 @@ fn query_features_test() {
     use crate::ecs::collections::sync_sparse_chunked_store::SyncSparseChunkedStore;
 
     struct View<T> {
-        data: *mut SyncSparseChunkedStore<T>,
+        data: *mut Components<T>,
     }
 
     impl<T> Deref for View<T> {
-        type Target = SyncSparseChunkedStore<T>;
+        type Target = Components<T>;
 
         fn deref(&self) -> &Self::Target {
             unsafe { &*self.data }
@@ -106,7 +108,7 @@ fn query_features_test() {
 
     #[allow(non_snake_case)]
     let Position: View<Position> = {
-        let position = Box::new(SyncSparseChunkedStore::new());
+        let mut position = Box::new(Components::default());
         position.set(
             10,
             10,
@@ -138,7 +140,7 @@ fn query_features_test() {
 
     #[allow(non_snake_case)]
     let Attributes: View<Attributes> = {
-        let attributes = Box::new(SyncSparseChunkedStore::new());
+        let mut attributes = Box::new(Components::default());
         attributes.set(
             10,
             10,
@@ -170,7 +172,7 @@ fn query_features_test() {
     }
 
     let dynamic_component: View<Dynamic> = {
-        let dynamic = Box::new(SyncSparseChunkedStore::new());
+        let mut dynamic = Box::new(Components::default());
         dynamic.set(
             10,
             10,

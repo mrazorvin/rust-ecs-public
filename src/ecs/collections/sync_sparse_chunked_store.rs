@@ -10,17 +10,6 @@ impl<T: 'static> SyncSparseChunkedStore<T> {
     pub fn new() -> Self {
         Self { chunks: IVec::new() }
     }
-
-    pub fn set(&self, chunk_id: usize, entry_id: usize, data: T) -> Option<T> {
-        let chunk = self.chunks.get_or_insert(chunk_id, &|| {
-            (
-                chunk_id,
-                SyncSparseArrayChunk { arr: Box::into_raw(Box::new(SyncSparseArray::new())) },
-            )
-        });
-
-        chunk.1.set_in_place(entry_id, data)
-    }
 }
 
 // #region ### chunk wrapper that compatibily with ivec bounds

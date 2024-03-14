@@ -7,6 +7,7 @@ use std::{
 };
 
 use super::sync_vec::SyncVec;
+use crate::ecs::prelude::Components;
 
 // Total amount of buckets per single array
 // single bucket occupied 8bytes of space,
@@ -40,34 +41,32 @@ pub type SparseBucket<T> = (AtomicU64, AtomicPtr<Bucket<T>>);
 pub type SparseBucketRaw<T> = (UnsafeCell<u64>, *mut Bucket<T>);
 
 pub struct SyncSparseArray<T> {
-    pub buckets: SyncVec<SparseBucket<T>>,
     pub min_existed_id: AtomicU32,
     pub max_existed_id: AtomicU32,
     pub min_updated_id: AtomicU32,
     pub max_updated_id: AtomicU32,
+    pub components: *const Components<T>,
+    pub buckets: SyncVec<SparseBucket<T>>,
 }
 
-pub fn sync_array<T>() -> SyncSparseArray<T> {
+unsafe impl<T> Send for SyncSparseArray<T> {}
+unsafe impl<T> Sync for SyncSparseArray<T> {}
+
+pub fn sync_array<T>(components: Option<*const Components<T>>) -> SyncSparseArray<T> {
     SyncSparseArray {
-        buckets: SyncVec::new(),
+        components: match components {
+            Some(ptr) => ptr,
+            None => std::ptr::null(),
+        },
         max_updated_id: AtomicU32::new(u32::MIN),
         min_existed_id: AtomicU32::new(u32::MAX),
         max_existed_id: AtomicU32::new(u32::MIN),
         min_updated_id: AtomicU32::new(u32::MAX),
+        buckets: SyncVec::new(),
     }
 }
 
 impl<T> SyncSparseArray<T> {
-    pub fn new() -> Self {
-        SyncSparseArray {
-            max_updated_id: AtomicU32::new(u32::MIN),
-            min_existed_id: AtomicU32::new(u32::MAX),
-            max_existed_id: AtomicU32::new(u32::MIN),
-            min_updated_id: AtomicU32::new(u32::MAX),
-            buckets: SyncVec::new(),
-        }
-    }
-
     /// safety: self.buckets.get() is always safe to call, but following
     ///         transformation is unsafe because without manual sheduling
     ///         user may cause data races
@@ -343,7 +342,7 @@ fn test_bucket_lock_api() {
     let id = 5000;
 
     // #region ### Single insert & impl drop
-    let array = sync_array();
+    let array = sync_array(None);
     let mut bucket = array.bucket_lock(id);
     assert_eq!(bucket.set(id, String::from("value for id 123")), None);
     assert_eq!(array.min_relaxed(), u32::MAX as usize);
@@ -366,7 +365,7 @@ fn test_bucket_lock_api() {
     // #endregion
 
     // #region ### Mutltiple insert - manual drop
-    let array = sync_array();
+    let array = sync_array(None);
     let mut bucket = array.bucket_lock(id);
     assert_eq!(bucket.set(id, String::from("value for id 123")), None);
 
@@ -394,7 +393,7 @@ fn test_bucket_lock_api() {
 fn test_bucket_multithread_read_write() {
     use std::sync::Arc;
 
-    let array: SyncSparseArray<Arc<usize>> = sync_array();
+    let array: SyncSparseArray<Arc<usize>> = sync_array(None);
     let sparse: &'static SyncSparseArray<Arc<usize>> = unsafe { std::mem::transmute(&array) };
 
     let threads: Vec<_> = (100..1250)
@@ -474,7 +473,7 @@ fn test_bucket_multithread_read_write() {
 fn test_bucket_multithread_delete() {
     use std::sync::Arc;
 
-    let sparse = Arc::new(sync_array());
+    let sparse = Arc::new(sync_array(None));
     for i in (100..1250).step_by(30) {
         sparse.set_in_place(i, Arc::new(i));
     }
@@ -508,7 +507,7 @@ fn test_bucket_multithread_delete() {
 #[test]
 #[cfg(not(miri))]
 fn sync_sparse_array_min_max() {
-    let array = sync_array();
+    let array = sync_array(None);
     for id in 1..MAX_ITEMS_PER_ARRAY {
         array.set_in_place(id, id);
         assert_eq!(array.min_relaxed(), 0);
@@ -526,7 +525,7 @@ fn sync_sparse_array_min_max() {
 fn sync_sparse_array() {
     assert_eq!(std::mem::size_of::<SyncSparseArray<u128>>(), 1056);
 
-    let array: SyncSparseArray<_> = sync_array();
+    let array: SyncSparseArray<_> = sync_array(None);
     let insertion_time = std::time::Instant::now();
     let mut bucket_lock = array.bucket_lock(0);
     let mut current_chunk = 0;
@@ -554,7 +553,7 @@ fn sync_sparse_array() {
         assert_eq!(id, unsafe { chunk.slots[get_slot_index(id)].assume_init() });
     }
 
-    let array: SyncSparseArray<_> = sync_array();
+    let array: SyncSparseArray<_> = sync_array(None);
     let insertion_time = std::time::Instant::now();
     let mut current_chunk = 0;
     let mut chunk_index = 1;
@@ -593,7 +592,7 @@ fn sync_sparse_array() {
         assert_eq!(id, unsafe { chunk.slots[get_slot_index(id)].assume_init() });
     }
 
-    let array: SyncSparseArray<_> = sync_array();
+    let array: SyncSparseArray<_> = sync_array(None);
     let insertion_time = std::time::Instant::now();
     for id in 1..MAX_ITEMS_PER_ARRAY {
         array.set_in_place(id, id);
