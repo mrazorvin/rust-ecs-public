@@ -1,21 +1,25 @@
-use crate::ecs::collections::{
-    sync_sparse_array::{self, sync_array},
-    sync_sparse_chunked_store::{SyncSparseArrayChunk, SyncSparseChunkedStore},
-    sync_vec::SyncVec,
+use crate::ecs::{
+    collections::{
+        sync_sparse_array::{self, sync_array},
+        sync_sparse_chunked_store::{SyncSparseArrayChunk, SyncSparseChunkedStore},
+        sync_vec::SyncVec,
+    },
+    system::{self, Stage},
+    world,
 };
 use std::{
-    any::TypeId,
+    any::{self, TypeId},
     marker::PhantomData,
     ops::{Deref, DerefMut},
     sync::atomic::{AtomicU32, Ordering},
 };
 
-// this and possible some other functions required 
+// this and possible some other functions required
 // additional trait bound than just any
-// for example disposing/is_changed etc... 
+// for example disposing/is_changed etc...
 pub static CHANGED_COMPONENTS: SyncVec<TypeId> = SyncVec::new();
 
-pub struct Components<T> {
+pub struct Components<T: Sized> {
     store: SyncSparseChunkedStore<T>,
     len: AtomicU32,
 
@@ -74,3 +78,34 @@ impl<T> DerefMut for Components<T> {
         &mut self.store
     }
 }
+
+pub trait ComponnetsResource: Sized + 'static {
+    fn fetch(
+        system: &mut system::State<world::State, system::stage_kind::Initilization>,
+    ) -> Result<*mut Components<Self>, String> {
+        let components_ptr = unsafe { &*system.world() }
+            .resources
+            .get(&TypeId::of::<Components<Self>>())
+            .map(|(ptr, _)| unsafe { std::mem::transmute::<*mut u8, *mut Components<Self>>(*ptr) });
+
+        match system.stage() {
+            Stage::Instantination => Err(format!(
+                "Instantination stage can't be used to fetch {}",
+                any::type_name::<Components<Self>>()
+            )),
+            Stage::Initialization => match components_ptr {
+                Some(ptr) => Ok(ptr),
+                None => {
+                    let comps: Components<Self> = Components::default();
+                    unsafe { &mut *system.world() }.add_resource(comps)
+                }
+            },
+            Stage::Execution => components_ptr.ok_or(format!(
+                "{} non exists in world",
+                any::type_name::<Components<Self>>()
+            )),
+        }
+    }
+}
+
+impl<T: ComponnetsResource + 'static> world::Resource for Components<T> {}

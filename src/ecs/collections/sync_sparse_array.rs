@@ -523,7 +523,7 @@ fn sync_sparse_array_min_max() {
 #[test]
 #[cfg(not(miri))]
 fn sync_sparse_array() {
-    assert_eq!(std::mem::size_of::<SyncSparseArray<u128>>(), 1056);
+    assert_eq!(std::mem::size_of::<SyncSparseArray<u128>>(), 1064);
 
     let array: SyncSparseArray<_> = sync_array(None);
     let insertion_time = std::time::Instant::now();

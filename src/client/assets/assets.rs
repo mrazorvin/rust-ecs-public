@@ -33,7 +33,8 @@ impl Assets {
     ) -> Result<Rc<CompressedTexture2d>, Box<dyn Error>> {
         let mut transcoder = Transcoder::new();
         let mut basis_file = Vec::new();
-        sdl2::rwops::RWops::from_file(format!("{basis_path}"), "r+")?.read_to_end(&mut basis_file)?;
+        sdl2::rwops::RWops::from_file(format!("{basis_path}"), "r+")?
+            .read_to_end(&mut basis_file)?;
         transcoder.prepare_transcoding(&basis_file).unwrap();
         let image = transcoder
             .transcode_image_level(
@@ -42,11 +43,7 @@ impl Assets {
                 TranscoderTextureFormat::ASTC_4x4_RGBA,
                 #[cfg(not(target_os = "android"))]
                 TranscoderTextureFormat::BC3_RGBA,
-                TranscodeParameters {
-                    image_index: 0,
-                    level_index: 0,
-                    ..Default::default()
-                },
+                TranscodeParameters { image_index: 0, level_index: 0, ..Default::default() },
             )
             .unwrap();
 
@@ -88,7 +85,8 @@ impl Assets {
     }
 
     pub fn load_tilemap(&mut self, key: &str, opengl: &mut OpenGL) -> Result<(), Box<dyn Error>> {
-        let map = Tilemap::deserialize_json(&Assets::read_json(&format!("assets/{key}/info.json"))?)?;
+        let map =
+            Tilemap::deserialize_json(&Assets::read_json(&format!("assets/{key}/info.json"))?)?;
 
         self.load_texture(&format!("assets/{key}/packed_map.basis"), key, opengl)?;
         self.load_texture(
@@ -110,14 +108,8 @@ impl Assets {
 
 impl Default for Assets {
     fn default() -> Self {
-        Self {
-            sprites: Default::default(),
-            maps: Default::default(),
-            pipeline: None,
-        }
+        Self { sprites: Default::default(), maps: Default::default(), pipeline: None }
     }
 }
 
-impl world::Resource for Assets {
-    type Target = Assets;
-}
+impl world::UniqueResource for Assets {}

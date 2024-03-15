@@ -1,18 +1,12 @@
 #![allow(non_snake_case)]
+use crate::ecs::{components::ComponnetsResource, prelude::*};
 
-use crate::ecs::prelude::*;
-
-// #region ### Position components
-#[derive(Default)]
+// ### Position components
+impl ComponnetsResource for Position {}
 struct Position {}
 
-impl world::Resource for Position {
-    type Target = Components<Position>;
-}
-// #endregion
-
-// #region ### Resource
-#[derive(Default)]
+// ### Resource
+impl UniqueResource for Input {}
 struct Input {
     x: u32,
     y: u32,
@@ -24,15 +18,11 @@ impl Input {
     }
 }
 
-impl world::Resource for Input {
-    type Target = Input;
-}
-// #endregion
-
 #[test]
 fn world_test() {
     let mut world = world::World::new();
 
+    world.add_unique(Input { x: 10, y: 20 }).unwrap();
     world.add_system(simple_system, Schedule::Update);
 
     world.execute();

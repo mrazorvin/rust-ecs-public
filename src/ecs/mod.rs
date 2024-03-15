@@ -20,8 +20,8 @@ pub mod prelude {
     pub use super::system;
     pub use super::view::*;
     pub use super::world;
-    pub use super::world::Resource;
     pub use super::world::Schedule;
+    pub use super::world::UniqueResource;
 }
 
 pub use integration_tests::integration_tests;

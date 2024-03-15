@@ -11,18 +11,21 @@ use crate::{
     client::{
         assets::assets::Assets,
         render_loop::{self, Loop, OpenGL, Ui},
-        sprite::sprite::LightData,
+        sprite::sprite::{LightData, SpritePipeline},
         tilemap::tilemap::Tile,
     },
-    ecs::{prelude::*, query::query_ctx, world::World},
+    ecs::{components::ComponnetsResource, prelude::*, query::query_ctx, world::World},
 };
 
 pub fn start_game() -> Result<(), Box<dyn std::error::Error>> {
-    let world = world::World::new();
+    let mut world = world::World::new();
+    world.add_unique(Assets::default())?;
+    world.add_unique(Audio { ctx: AudioContext::new() })?;
+    world.add_unique(Light { pos: [0.0, 0.0]})?;
     render_loop::render_loop(world, &|world| world.add_system(schedule, Schedule::Update))
 }
 
-#[derive(Default)]
+impl ComponnetsResource for Sprite {}
 struct Sprite {
     id: &'static str,
     kind: &'static str,
@@ -30,11 +33,7 @@ struct Sprite {
     pos: Vec2,
 }
 
-impl world::Resource for Sprite {
-    type Target = Components<Sprite>;
-}
-
-#[derive(Default)]
+impl ComponnetsResource for Enemy {}
 struct Enemy {
     id: &'static str,
     kind: &'static str,
@@ -44,20 +43,12 @@ struct Enemy {
     push: Option<Vec2>,
 }
 
-impl world::Resource for Enemy {
-    type Target = Components<Enemy>;
-}
-
-#[derive(Default)]
+impl UniqueResource for Light {}
 struct Light {
     pos: [f32; 2],
 }
 
-impl world::Resource for Light {
-    type Target = Light;
-}
-
-#[derive(Default)]
+impl ComponnetsResource for Effect {}
 struct Effect {
     id: &'static str,
     kind: &'static str,
@@ -67,24 +58,12 @@ struct Effect {
     pos: Vec2,
 }
 
+impl world::UniqueResource for Audio {}
 struct Audio {
     ctx: AudioContext,
 }
 
-impl Default for Audio {
-    fn default() -> Self {
-        Audio { ctx: AudioContext::new() }
-    }
-}
 
-impl world::Resource for Audio {
-    type Target = Audio;
-}
-
-impl world::Resource for Effect {
-    type Target = Components<Effect>;
-}
-//
 fn schedule(sys: &mut world::System) -> system::Return {
     system::define!(sys, read![Sprite], {
         if Sprite.len() == 0 {
@@ -355,7 +334,7 @@ fn render_effect_front(sys: &mut world::System) -> system::Return {
         Some([Vec2 { x: ix1, y: iy1 }, Vec2 { x: ix2, y: iy2 }])
     }
 
-    let Assets { ref mut pipeline, ref maps, .. } = *Assets;
+    let Assets { ref mut pipeline, ref maps, .. } = **Assets;
 // 
     // let pipeline = pipeline.as_mut().ok_or("Pipeline must existed")?;
     // let mut mapping = pipeline.light_intersection_buffer.map();

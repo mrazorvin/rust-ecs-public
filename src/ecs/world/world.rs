@@ -215,7 +215,7 @@ impl State {
         }
     }
 
-    pub fn set_resource<T: 'static>(&mut self, data: T) -> (*mut T, Option<T>) {
+    pub fn set_resource<T: Resource>(&mut self, data: T) -> (*mut T, Option<T>) {
         let existed_resource = self
             .resources
             .get(&TypeId::of::<T>())
@@ -236,36 +236,75 @@ impl State {
         }
     }
 
-    pub fn add_resource<T: 'static>(&mut self, data: T) -> Result<*mut T, String> {
+    pub fn add_resource<T: Resource>(&mut self, data: T) -> Result<*mut T, String> {
         match self.set_resource(data) {
             (_, Some(_)) => Err(format!("{} already exists in world", any::type_name::<T>())),
             (ptr, None) => Ok(ptr),
         }
     }
+
+    pub fn add_unique<T: UniqueResource>(&mut self, data: T) -> Result<*mut Unique<T>, String> {
+        match self.set_resource(Unique { data }) {
+            (_, Some(_)) => {
+                Err(format!("Unique {} already exists in world", any::type_name::<T>()))
+            }
+            (ptr, None) => Ok(ptr),
+        }
+    }
+
+    pub fn set_unique<T: UniqueResource>(
+        &mut self,
+        data: T,
+    ) -> (*mut Unique<T>, Option<Unique<T>>) {
+        self.set_resource(Unique { data })
+    }
 }
 
-pub trait Resource {
-    type Target: Default + 'static;
+pub trait Resource: 'static {}
+impl<T: UniqueResource> Resource for Unique<T> {}
 
+#[repr(transparent)]
+pub struct Unique<T> {
+    data: T,
+}
+
+impl<T> Deref for Unique<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.data
+    }
+}
+
+impl<T> DerefMut for Unique<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.data
+    }
+}
+
+pub trait UniqueResource: 'static + Sized {
     fn fetch(
         system: &mut system::State<State, system::stage_kind::Initilization>,
-    ) -> Result<*mut Self::Target, String> {
+    ) -> Result<*mut Unique<Self>, String> {
         let components_ptr = unsafe { &*system.world() }
             .resources
-            .get(&TypeId::of::<Self::Target>())
-            .map(|(ptr, _)| unsafe { std::mem::transmute::<*mut u8, *mut Self::Target>(*ptr) });
+            .get(&TypeId::of::<Unique<Self>>())
+            .map(|(ptr, _)| unsafe { std::mem::transmute::<*mut u8, *mut Unique<Self>>(*ptr) });
 
         match system.stage() {
             Stage::Instantination => Err(format!(
                 "Instantination stage can't be used to fetch {}",
-                any::type_name::<Self::Target>()
+                any::type_name::<Unique<Self>>()
             )),
             Stage::Initialization => match components_ptr {
                 Some(ptr) => Ok(ptr),
-                None => unsafe { &mut *system.world() }.add_resource(Self::Target::default()),
+                None => panic!(
+                    "Unique {} resources can't be added into world dybnamically",
+                    any::type_name::<Unique<Self>>()
+                ),
             },
             Stage::Execution => components_ptr
-                .ok_or(format!("{} non exists in world", any::type_name::<Self::Target>())),
+                .ok_or(format!("{} non exists in world", any::type_name::<Unique<Self>>())),
         }
     }
 }

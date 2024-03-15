@@ -38,19 +38,23 @@ pub fn render_loop(
 
     // it's ok to have init this value here  because no-one can access it
     // until first execution call
-    let (opengl, _) = world.set_resource(OpenGL {
+    let (opengl, _) = world.set_unique(OpenGL {
         frame: None,
         display: std::ptr::null(),
         textures: HashMap::new(),
     });
 
-    let (ui, _) = world.set_resource(Ui {
+    let (ui, _) = world.set_unique(Ui {
         ui: std::ptr::null_mut(),
         renderer: imgui_renderer_ptr.ptr,
         textures: HashMap::new(),
     });
 
-    let loop_res = world.add_resource(Loop { time: 0, second: 0.0 })?;
+    let loop_res = world.add_unique(Loop {
+        time: 0,
+        second: 0.0,
+    })?;
+
     let mut event_pump = app.sdl.event_pump()?;
     let mut second = Instant::now();
 
@@ -160,13 +164,9 @@ pub struct Loop {
     pub second: f32,
 }
 
-impl world::Resource for Loop {
-    type Target = Loop;
-}
-// #endregion
+impl world::UniqueResource for Loop {}
 
-// #region ### ui resource
-
+// ### UI resource
 pub struct Ui {
     ui: *mut imgui::Ui,
     renderer: *mut glium_imgui_renderer::Renderer,
@@ -176,12 +176,6 @@ pub struct Ui {
 impl Ui {
     pub fn renderer(&mut self) -> &mut glium_imgui_renderer::Renderer {
         unsafe { &mut *self.renderer }
-    }
-}
-
-impl Default for Ui {
-    fn default() -> Self {
-        panic!("UI# cannot be instantinated by default");
     }
 }
 
@@ -199,13 +193,9 @@ impl DerefMut for Ui {
     }
 }
 
-impl world::Resource for Ui {
-    type Target = Ui;
-}
-// #endregion
+impl world::UniqueResource for Ui {}
 
-// #region ### frame resource
-
+// ### Frame resource
 pub struct OpenGL {
     pub frame: Option<glium::Frame>,
     display: *const SDL2Facade,
@@ -215,12 +205,6 @@ pub struct OpenGL {
 impl OpenGL {
     pub fn display(&self) -> &SDL2Facade {
         unsafe { &*self.display }
-    }
-}
-
-impl Default for OpenGL {
-    fn default() -> Self {
-        panic!("ClientFrame# cannot be instantinated by default");
     }
 }
 
@@ -238,8 +222,4 @@ impl DerefMut for OpenGL {
     }
 }
 
-impl world::Resource for OpenGL {
-    type Target = OpenGL;
-}
-
-// #endregion
+impl world::UniqueResource for OpenGL {}
