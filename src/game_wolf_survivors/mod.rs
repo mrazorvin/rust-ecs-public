@@ -21,8 +21,8 @@ pub fn start_game() -> Result<(), Box<dyn std::error::Error>> {
     let mut world = world::World::new();
     world.add_unique(Assets::default())?;
     world.add_unique(Audio { ctx: AudioContext::new() })?;
-    world.add_unique(Light { pos: [0.0, 0.0]})?;
-    render_loop::render_loop(world, &|world| world.add_system(schedule, Schedule::Update))
+    world.add_unique(Light { pos: [0.0, 0.0] })?;
+    render_loop::render_loop(world, &|world| world.add_system(schedule, Schedule::Update), &|_| {})
 }
 
 impl ComponnetsResource for Sprite {}
@@ -62,7 +62,6 @@ impl world::UniqueResource for Audio {}
 struct Audio {
     ctx: AudioContext,
 }
-
 
 fn schedule(sys: &mut world::System) -> system::Return {
     system::define!(sys, read![Sprite], {
@@ -335,7 +334,7 @@ fn render_effect_front(sys: &mut world::System) -> system::Return {
     }
 
     let Assets { ref mut pipeline, ref maps, .. } = **Assets;
-// 
+    //
     // let pipeline = pipeline.as_mut().ok_or("Pipeline must existed")?;
     // let mut mapping = pipeline.light_intersection_buffer.map();
     // let map = maps.get("forest_map").ok_or("Unknown map")?;
@@ -810,156 +809,156 @@ fn render_enemy(sys: &mut world::System) -> system::Return {
     render_specific_effect("Blood", Some(14), Light.pos, &mut OpenGL, &Assets, &mut Effect);
 
     let mut total_enemies = 0;
-    
-        query_try!(Enemy[&mut sprite], |id| {
-            let db = Assets.sprites.get(sprite.id)?;
-            let texture = OpenGL.textures.get(sprite.id)?;
-    
-            if sprite.dead.is_some()
-                && unsafe { sprite.dead.unwrap_unchecked() }.elapsed().as_secs_f32() > 20.0
-            {
-                continue;
-            }
-    
-            if sprite.dead.is_none() {
-                let target = position - (sprite.pos + origin);
-                let direction = target.normalize() * 1.25;
-    
-                sprite.kind = "run";
-                sprite.pos += direction;
-    
-                let angle = (direction).angle_between(Vec2 { x: 1f32, y: 0f32 }).to_degrees();
-                let angle = if angle > 0f32 { angle } else { 360f32 - angle.abs() };
-                sprite.direction = match angle as i32 {
-                    0..=22 => "right",
-                    23..=67 => "backward_right",
-                    68..=112 => "backward",
-                    113..=157 => "backward_left",
-                    158..=202 => "left",
-                    203..=247 => "forward_left",
-                    248..=292 => "forward",
-                    293..=337 => "forward_right",
-                    338..=360 => "right",
-                    _ => unimplemented!("Unknow direction"),
-                };
 
-                query!(Sprite[&hero], |_| {
-                    let unit_radius = 20f32;
-                    let hero_pos =
-                        to_cartesian(hero.pos, Vec2 { x: 1920f32 / 2f32, y: 1080f32 / 2f32 });
-                    let character_pos =
-                        to_cartesian(sprite.pos, Vec2 { x: 1920f32 / 2f32, y: 1080f32 / 2f32 });
-                    let intersect_with_hero = ((hero_pos.x - character_pos.x).powi(2)
-                        + (hero_pos.y - character_pos.y).powi(2))
-                        <= (unit_radius + unit_radius).powi(2);
-    
-                    if intersect_with_hero {
-                        sprite.push = Some(target.normalize() * -10f32);
-                        sprite.dead = Some(Instant::now());
-                        sprite.kind = "death";
-                        sound
-                            .play(&Audio.ctx, quad_snd::PlaySoundParams { looped: false, volume: 0.3 });
-                    }
+    query_try!(Enemy[&mut sprite], |id| {
+        let db = Assets.sprites.get(sprite.id)?;
+        let texture = OpenGL.textures.get(sprite.id)?;
 
-                    query!(Effect[&effect], |_| {
-                        let elapsed = unsafe { effect.time.unwrap_unchecked() }.elapsed().as_secs_f32();
-                        if elapsed > 0.4 && elapsed < 0.8f32 && !effect.id.starts_with("Blood") {
-                            let effect_radius = 50f32;
-                            let effect_pos = to_cartesian(
-                                Vec2 { x: effect.pos.x + 64f32, y: effect.pos.y + 64f32 },
-                                Vec2 { x: 1920f32 / 2f32, y: 1080f32 / 2f32 },
-                            );
-    
-                            let intersect_with_effect = ((effect_pos.x - character_pos.x).powi(2)
-                                + (effect_pos.y - character_pos.y).powi(2))
-                                <= (effect_radius + unit_radius).powi(2);
-    
-                            if intersect_with_effect {
-                                let mut rng = WyRand::new();
-                                let x = rng.generate_range(0u8..=20);
-                                let y = rng.generate_range(0u8..=20);
-                                sprite.dead = Some(Instant::now());
-                                sprite.kind = "death";
-                                sound.play(
-                                    &Audio.ctx,
-                                    quad_snd::PlaySoundParams { looped: false, volume: 0.3 },
-                                );
-                                unsafe {
-                                    Effect.try_set(
-                                        5,
-                                        id,
-                                        Effect {
-                                            id: "BloodExplosionVFX_Packed",
-                                            kind: "effect",
-                                            time: Some(Instant::now()),
-                                            direction: "effect",
-                                            pos: Vec2 {
-                                                x: sprite.pos.x as f32 + x as f32,
-                                                y: sprite.pos.y as f32 + y as f32,
-                                            },
-                                            size: 128f32,
-                                        },
-                                    )
-                                };
-                            }
-                        }
-                    });
-                });
-            }
+        if sprite.dead.is_some()
+            && unsafe { sprite.dead.unwrap_unchecked() }.elapsed().as_secs_f32() > 20.0
+        {
+            continue;
+        }
 
-            if let Some(push_strength) = sprite.push {
-                if push_strength.length() > 1.05 {
-                    sprite.pos += push_strength;
-                    let next_push = push_strength * 0.85;
-                    sprite.push = Some(next_push);
-                    if next_push.length() > 1.05 {
-                        Effect.set(
-                            5,
-                            id,
-                            Effect {
-                                id: "BloodExplosionVFX_Packed",
-                                kind: "effect",
-                                time: Some(Instant::now()),
-                                direction: "effect",
-                                pos: Vec2 { x: sprite.pos.x as f32, y: sprite.pos.y as f32 },
-                                size: 128f32,
-                            },
+        if sprite.dead.is_none() {
+            let target = position - (sprite.pos + origin);
+            let direction = target.normalize() * 1.25;
+
+            sprite.kind = "run";
+            sprite.pos += direction;
+
+            let angle = (direction).angle_between(Vec2 { x: 1f32, y: 0f32 }).to_degrees();
+            let angle = if angle > 0f32 { angle } else { 360f32 - angle.abs() };
+            sprite.direction = match angle as i32 {
+                0..=22 => "right",
+                23..=67 => "backward_right",
+                68..=112 => "backward",
+                113..=157 => "backward_left",
+                158..=202 => "left",
+                203..=247 => "forward_left",
+                248..=292 => "forward",
+                293..=337 => "forward_right",
+                338..=360 => "right",
+                _ => unimplemented!("Unknow direction"),
+            };
+
+            query!(Sprite[&hero], |_| {
+                let unit_radius = 20f32;
+                let hero_pos =
+                    to_cartesian(hero.pos, Vec2 { x: 1920f32 / 2f32, y: 1080f32 / 2f32 });
+                let character_pos =
+                    to_cartesian(sprite.pos, Vec2 { x: 1920f32 / 2f32, y: 1080f32 / 2f32 });
+                let intersect_with_hero = ((hero_pos.x - character_pos.x).powi(2)
+                    + (hero_pos.y - character_pos.y).powi(2))
+                    <= (unit_radius + unit_radius).powi(2);
+
+                if intersect_with_hero {
+                    sprite.push = Some(target.normalize() * -10f32);
+                    sprite.dead = Some(Instant::now());
+                    sprite.kind = "death";
+                    sound
+                        .play(&Audio.ctx, quad_snd::PlaySoundParams { looped: false, volume: 0.3 });
+                }
+
+                query!(Effect[&effect], |_| {
+                    let elapsed = unsafe { effect.time.unwrap_unchecked() }.elapsed().as_secs_f32();
+                    if elapsed > 0.4 && elapsed < 0.8f32 && !effect.id.starts_with("Blood") {
+                        let effect_radius = 50f32;
+                        let effect_pos = to_cartesian(
+                            Vec2 { x: effect.pos.x + 64f32, y: effect.pos.y + 64f32 },
+                            Vec2 { x: 1920f32 / 2f32, y: 1080f32 / 2f32 },
                         );
+
+                        let intersect_with_effect = ((effect_pos.x - character_pos.x).powi(2)
+                            + (effect_pos.y - character_pos.y).powi(2))
+                            <= (effect_radius + unit_radius).powi(2);
+
+                        if intersect_with_effect {
+                            let mut rng = WyRand::new();
+                            let x = rng.generate_range(0u8..=20);
+                            let y = rng.generate_range(0u8..=20);
+                            sprite.dead = Some(Instant::now());
+                            sprite.kind = "death";
+                            sound.play(
+                                &Audio.ctx,
+                                quad_snd::PlaySoundParams { looped: false, volume: 0.3 },
+                            );
+                            unsafe {
+                                Effect.try_set(
+                                    5,
+                                    id,
+                                    Effect {
+                                        id: "BloodExplosionVFX_Packed",
+                                        kind: "effect",
+                                        time: Some(Instant::now()),
+                                        direction: "effect",
+                                        pos: Vec2 {
+                                            x: sprite.pos.x as f32 + x as f32,
+                                            y: sprite.pos.y as f32 + y as f32,
+                                        },
+                                        size: 128f32,
+                                    },
+                                )
+                            };
+                        }
                     }
+                });
+            });
+        }
+
+        if let Some(push_strength) = sprite.push {
+            if push_strength.length() > 1.05 {
+                sprite.pos += push_strength;
+                let next_push = push_strength * 0.85;
+                sprite.push = Some(next_push);
+                if next_push.length() > 1.05 {
+                    Effect.set(
+                        5,
+                        id,
+                        Effect {
+                            id: "BloodExplosionVFX_Packed",
+                            kind: "effect",
+                            time: Some(Instant::now()),
+                            direction: "effect",
+                            pos: Vec2 { x: sprite.pos.x as f32, y: sprite.pos.y as f32 },
+                            size: 128f32,
+                        },
+                    );
                 }
             }
-    
-            if sprite.dead.is_some() && sprite.push.is_none() {
-                continue;
-            }
-            total_enemies += 1;
-    
-            let animations = db["tiles"][sprite.kind][sprite.direction].as_array()?;
-    
-            let frame_idx = match sprite.dead {
-                Some(time) if (time.elapsed().as_secs_f32()) < 0.64f32 => time.elapsed().as_secs_f32(),
-                Some(_) => 0.63f32,
-                _ => Loop.second,
-            } / (0.64f32 / animations.len() as f32);
-    
-            let current_frame = animations.get(frame_idx as usize % animations.len())?;
-    
-            let transform = world_matrix.mul_mat3(&glam::Mat3::from_scale_angle_translation(
-                Vec2 { x: 128f32, y: 128f32 },
-                0f32,
-                Vec2 { x: sprite.pos.x, y: sprite.pos.y },
-            ));
-    
-            let mat4: [[f32; 3]; 3] = unsafe { std::mem::transmute(transform) };
-            let texture = texture.clone();
-            let texture = texture
-                .sampled()
-                .magnify_filter(glium::uniforms::MagnifySamplerFilter::Nearest)
-                .minify_filter(glium::uniforms::MinifySamplerFilter::Nearest);
-    
-            let pipeline = unsafe { Assets.pipeline.as_ref().unwrap_unchecked() };
-    
-            OpenGL
+        }
+
+        if sprite.dead.is_some() && sprite.push.is_none() {
+            continue;
+        }
+        total_enemies += 1;
+
+        let animations = db["tiles"][sprite.kind][sprite.direction].as_array()?;
+
+        let frame_idx = match sprite.dead {
+            Some(time) if (time.elapsed().as_secs_f32()) < 0.64f32 => time.elapsed().as_secs_f32(),
+            Some(_) => 0.63f32,
+            _ => Loop.second,
+        } / (0.64f32 / animations.len() as f32);
+
+        let current_frame = animations.get(frame_idx as usize % animations.len())?;
+
+        let transform = world_matrix.mul_mat3(&glam::Mat3::from_scale_angle_translation(
+            Vec2 { x: 128f32, y: 128f32 },
+            0f32,
+            Vec2 { x: sprite.pos.x, y: sprite.pos.y },
+        ));
+
+        let mat4: [[f32; 3]; 3] = unsafe { std::mem::transmute(transform) };
+        let texture = texture.clone();
+        let texture = texture
+            .sampled()
+            .magnify_filter(glium::uniforms::MagnifySamplerFilter::Nearest)
+            .minify_filter(glium::uniforms::MinifySamplerFilter::Nearest);
+
+        let pipeline = unsafe { Assets.pipeline.as_ref().unwrap_unchecked() };
+
+        OpenGL
                 .draw(
                     &pipeline.vertex_buffer,
                     &pipeline.index_buffer,
@@ -977,8 +976,6 @@ fn render_enemy(sys: &mut world::System) -> system::Return {
                         u_Lights: &(pipeline.light_buffer),
                         u_LightsLen: pipeline.lights as i32,
                         u_LightsIntersectionLen: 0,
-    
-    
                         u_ImageWidth: db["size"].as_f32()?,
                         u_TileWidth: db["tile_width"].as_f32()?,
                         u_TileHeight: db["tile_width"].as_f32()?,
@@ -991,11 +988,11 @@ fn render_enemy(sys: &mut world::System) -> system::Return {
                     },
                 )
                 .ok()?;
-        });
-    
-        if Loop.second < 0.9 && Loop.second > 0.89 {
-            println!("Total enemies sprites: {}", total_enemies);
-        }
+    });
+
+    if Loop.second < 0.9 && Loop.second > 0.89 {
+        println!("Total enemies sprites: {}", total_enemies);
+    }
 
     return system::OK;
 }

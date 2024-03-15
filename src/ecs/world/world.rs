@@ -160,7 +160,7 @@ pub struct State {
     pub scheduler: Scheduler,
     pub resources: HashMap<
         any::TypeId,
-        (*mut u8, BumpBox<'static, dyn any::Any>),
+        (*mut u8, BumpBox<'static, dyn Resource>),
         // SAFETY: 24.2.2024 - TypeId use u64 in hash function, if they switch to type that no suppoerted by `NoHashHasher`` application will panic at the start
         BuildHasherDefault<NoHashHasher<u64>>,
     >,
@@ -260,7 +260,18 @@ impl State {
     }
 }
 
-pub trait Resource: 'static {}
+pub trait DisposeFrame {
+    fn dispose_frame(&mut self) -> bool;
+}
+
+pub trait Resource: 'static + DisposeFrame {}
+
+impl<T: UniqueResource> DisposeFrame for Unique<T> {
+    fn dispose_frame(&mut self) -> bool {
+        T::dispose_frame(self)
+    }
+}
+
 impl<T: UniqueResource> Resource for Unique<T> {}
 
 #[repr(transparent)]
@@ -283,6 +294,10 @@ impl<T> DerefMut for Unique<T> {
 }
 
 pub trait UniqueResource: 'static + Sized {
+    fn dispose_frame(&mut self) -> bool {
+        false
+    }
+
     fn fetch(
         system: &mut system::State<State, system::stage_kind::Initilization>,
     ) -> Result<*mut Unique<Self>, String> {

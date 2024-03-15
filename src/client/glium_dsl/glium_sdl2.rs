@@ -113,10 +113,7 @@ impl SDL2Facade {
     ///
     /// Note that destroying a `Frame` is immediate, even if vsync is enabled.
     pub fn draw(&self) -> glium::Frame {
-        glium::Frame::new(
-            self.context.clone(),
-            self.backend.get_framebuffer_dimensions(),
-        )
+        glium::Frame::new(self.context.clone(), self.backend.get_framebuffer_dimensions())
     }
 }
 
@@ -237,20 +234,11 @@ impl SDL2WindowBackend {
         let window = window_builder.opengl().build()?;
         let context = window.gl_create_context()?;
 
-        let back = SDL2WindowBackend {
-            window: UnsafeCell::new(window),
-            context: context,
-        };
+        let back = SDL2WindowBackend { window: UnsafeCell::new(window), context: context };
 
-        println!("{:?}", unsafe {
-            back.get_proc_address("glGetActiveUniform")
-        });
-        println!("{:?}", unsafe {
-            back.get_proc_address("glGetActiveUniformName")
-        });
-        println!("{:?}", unsafe {
-            back.get_proc_address("glGetActiveUniformsiv")
-        });
+        println!("{:?}", unsafe { back.get_proc_address("glGetActiveUniform") });
+        println!("{:?}", unsafe { back.get_proc_address("glGetActiveUniformName") });
+        println!("{:?}", unsafe { back.get_proc_address("glGetActiveUniformsiv") });
 
         return Ok(back);
     }

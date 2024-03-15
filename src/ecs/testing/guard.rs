@@ -8,7 +8,12 @@ impl<'a> Guard<'a> {
     pub fn clone(&self) -> Self {
         while self
             .lock
-            .compare_exchange(0, 1, std::sync::atomic::Ordering::SeqCst, std::sync::atomic::Ordering::SeqCst)
+            .compare_exchange(
+                0,
+                1,
+                std::sync::atomic::Ordering::SeqCst,
+                std::sync::atomic::Ordering::SeqCst,
+            )
             .is_err()
         {}
 

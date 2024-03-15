@@ -80,6 +80,10 @@ impl<T> DerefMut for Components<T> {
 }
 
 pub trait ComponnetsResource: Sized + 'static {
+    fn dispose_frame(components: &mut Components<Self>) -> bool {
+        false
+    }
+
     fn fetch(
         system: &mut system::State<world::State, system::stage_kind::Initilization>,
     ) -> Result<*mut Components<Self>, String> {
@@ -100,12 +104,15 @@ pub trait ComponnetsResource: Sized + 'static {
                     unsafe { &mut *system.world() }.add_resource(comps)
                 }
             },
-            Stage::Execution => components_ptr.ok_or(format!(
-                "{} non exists in world",
-                any::type_name::<Components<Self>>()
-            )),
+            Stage::Execution => components_ptr
+                .ok_or(format!("{} non exists in world", any::type_name::<Components<Self>>())),
         }
     }
 }
 
-impl<T: ComponnetsResource + 'static> world::Resource for Components<T> {}
+impl<T: ComponnetsResource> world::Resource for Components<T> {}
+impl<T: ComponnetsResource> world::DisposeFrame for Components<T> {
+    fn dispose_frame(&mut self) -> bool {
+        T::dispose_frame(self)
+    }
+}

@@ -180,7 +180,8 @@ fn test_next_cycle_and_metric() {
     });
     self::next_cycle();
     assert_eq!(unsafe { METRICS_CYCLE }, {
-        let time_since_prev_cycle = (time_since_app_init_cycle2 - time_since_app_init_cycle1) as u32;
+        let time_since_prev_cycle =
+            (time_since_app_init_cycle2 - time_since_app_init_cycle1) as u32;
         let cycle_id = 1 << (FULL_CYCLE_BITS_LEN - CYCLE_ID_BITS_LEN);
 
         time_since_prev_cycle | cycle_id
@@ -192,7 +193,8 @@ fn test_next_cycle_and_metric() {
         ctx.time_since_prev_cycle.replace(Duration::from_millis(time_since_app_init_cycle3));
 
         // force cyles time overflow
-        METRICS_CYCLE = (u32::MAX >> CYCLE_ID_BITS_LEN) | (1 << (FULL_CYCLE_BITS_LEN - CYCLE_ID_BITS_LEN));
+        METRICS_CYCLE =
+            (u32::MAX >> CYCLE_ID_BITS_LEN) | (1 << (FULL_CYCLE_BITS_LEN - CYCLE_ID_BITS_LEN));
     });
     self::next_cycle();
     assert_eq!(unsafe { METRICS_CYCLE }, 0 | (2 << (FULL_CYCLE_BITS_LEN - CYCLE_ID_BITS_LEN)));

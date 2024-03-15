@@ -30,9 +30,7 @@ pub struct SyncVec<T> {
 
 impl<T> SyncVec<T> {
     pub const fn new() -> Self {
-        SyncVec {
-            root_chunk: unsafe { SyncVecChunk::new() },
-        }
+        SyncVec { root_chunk: unsafe { SyncVecChunk::new() } }
     }
 
     #[inline]
@@ -119,9 +117,7 @@ impl<T> SyncVec<T> {
     pub unsafe fn get_unchecked(&self, index: usize) -> &T {
         if index < SYNC_VEC_BUCKET_SIZE {
             unsafe {
-                return (*self.root_chunk.values.get())
-                    .get_unchecked(index)
-                    .assume_init_ref();
+                return (*self.root_chunk.values.get()).get_unchecked(index).assume_init_ref();
             };
         }
 
@@ -136,9 +132,7 @@ impl<T> SyncVec<T> {
         }
 
         unsafe {
-            (*chunk.values.get())
-                .get_unchecked(index % SYNC_VEC_BUCKET_SIZE)
-                .assume_init_ref()
+            (*chunk.values.get()).get_unchecked(index % SYNC_VEC_BUCKET_SIZE).assume_init_ref()
         }
     }
 }
@@ -251,11 +245,7 @@ pub struct ZipRangeIterator {
 
 impl ZipRangeIterator {
     pub fn new() -> ZipRangeIterator {
-        ZipRangeIterator {
-            idx: 0,
-            max_idx: usize::MAX,
-            first: true,
-        }
+        ZipRangeIterator { idx: 0, max_idx: usize::MAX, first: true }
     }
 
     #[inline]
@@ -345,10 +335,7 @@ fn iter() {
         }
     }
 
-    assert_eq!(
-        &result_vec,
-        &(0..SYNC_VEC_BUCKET_SIZE).collect::<Vec<usize>>()
-    );
+    assert_eq!(&result_vec, &(0..SYNC_VEC_BUCKET_SIZE).collect::<Vec<usize>>());
 
     let mut result_vec = Vec::new();
 
@@ -367,12 +354,7 @@ fn iter() {
     }
     // #endregion
 
-    assert_eq!(
-        &result_vec,
-        &(30..SYNC_VEC_BUCKET_SIZE)
-            .map(|v| v + v)
-            .collect::<Vec<usize>>()
-    )
+    assert_eq!(&result_vec, &(30..SYNC_VEC_BUCKET_SIZE).map(|v| v + v).collect::<Vec<usize>>())
 }
 
 #[test]
@@ -425,10 +407,7 @@ fn multi_thread_push_and_dealloc() {
         t.join().unwrap()
     }
 
-    assert_eq!(
-        unsafe { sync_vec.chunks_size() },
-        sync_vec.size() / SYNC_VEC_BUCKET_SIZE + 1
-    );
+    assert_eq!(unsafe { sync_vec.chunks_size() }, sync_vec.size() / SYNC_VEC_BUCKET_SIZE + 1);
     assert_eq!(sync_vec.size(), EXPECTED_SIZE.load(Ordering::Acquire));
 }
 
@@ -438,10 +417,7 @@ fn reset() {
     for i in 0..600 {
         sync_vec.push(i);
     }
-    assert_eq!(
-        unsafe { sync_vec.chunks_size() },
-        600 / SYNC_VEC_BUCKET_SIZE + 1
-    );
+    assert_eq!(unsafe { sync_vec.chunks_size() }, 600 / SYNC_VEC_BUCKET_SIZE + 1);
 
     unsafe { sync_vec.reset() };
 
@@ -466,10 +442,7 @@ fn reset() {
         }
     }
 
-    assert_eq!(
-        unsafe { sync_vec.chunks_size() },
-        500 / SYNC_VEC_BUCKET_SIZE + 1
-    );
+    assert_eq!(unsafe { sync_vec.chunks_size() }, 500 / SYNC_VEC_BUCKET_SIZE + 1);
     assert_eq!(&(0..500).rev().collect::<Vec<usize>>(), &vec);
 }
 

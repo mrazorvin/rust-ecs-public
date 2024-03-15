@@ -109,16 +109,8 @@ fn query_features_test() {
     #[allow(non_snake_case)]
     let Position: View<Position> = {
         let mut position = Box::new(Components::default());
-        position.set(
-            10,
-            10,
-            Position {
-                value: format!("Position {}", 10),
-            },
-        );
-        View {
-            data: Box::into_raw(position),
-        }
+        position.set(10, 10, Position { value: format!("Position {}", 10) });
+        View { data: Box::into_raw(position) }
     };
 
     impl View<Position> {
@@ -141,16 +133,8 @@ fn query_features_test() {
     #[allow(non_snake_case)]
     let Attributes: View<Attributes> = {
         let mut attributes = Box::new(Components::default());
-        attributes.set(
-            10,
-            10,
-            Attributes {
-                value: format!("Attributes {}", 10),
-            },
-        );
-        View {
-            data: Box::into_raw(attributes),
-        }
+        attributes.set(10, 10, Attributes { value: format!("Attributes {}", 10) });
+        View { data: Box::into_raw(attributes) }
     };
 
     impl View<Attributes> {
@@ -173,16 +157,8 @@ fn query_features_test() {
 
     let dynamic_component: View<Dynamic> = {
         let mut dynamic = Box::new(Components::default());
-        dynamic.set(
-            10,
-            10,
-            Dynamic {
-                value: format!("Dynamic {}", 10),
-            },
-        );
-        View {
-            data: Box::into_raw(dynamic),
-        }
+        dynamic.set(10, 10, Dynamic { value: format!("Dynamic {}", 10) });
+        View { data: Box::into_raw(dynamic) }
     };
 
     impl View<Dynamic> {
@@ -203,16 +179,10 @@ fn query_features_test() {
 
     let mut result = String::new();
 
-    query_ctx!(
-        q,
-        Position[f! { ref value }],
-        Attributes[&mut attrs],
-        dynamic_component[_],
-        |_| {
-            attrs.value += " + Dynamic variable";
-            result = format!("{} {}", value, attrs.value);
-        }
-    );
+    query_ctx!(q, Position[f! { ref value }], Attributes[&mut attrs], dynamic_component[_], |_| {
+        attrs.value += " + Dynamic variable";
+        result = format!("{} {}", value, attrs.value);
+    });
 
     assert_eq!(result, "Position 10 Attributes 10 + Dynamic variable");
 

@@ -31,10 +31,7 @@ pub struct View<T, U = read> {
 // #region ### View - shared
 impl<T, U> View<T, U> {
     pub unsafe fn new(components: *mut T) -> View<T, U> {
-        View {
-            data: components,
-            _marker: PhantomData {},
-        }
+        View { data: components, _marker: PhantomData {} }
     }
 
     #[inline]
@@ -55,10 +52,7 @@ impl<T, U> View<Components<T>, U> {}
 
 impl<T> View<Components<T>, read> {
     pub unsafe fn new_read(components: *mut T) -> View<T, read> {
-        View {
-            data: components,
-            _marker: PhantomData {},
-        }
+        View { data: components, _marker: PhantomData {} }
     }
 
     #[inline]
@@ -73,10 +67,7 @@ impl<T> View<Components<T>, read> {
 
 impl<T> View<Components<T>, write> {
     pub unsafe fn new_write(components: *mut T) -> View<T, write> {
-        View {
-            data: components,
-            _marker: PhantomData {},
-        }
+        View { data: components, _marker: PhantomData {} }
     }
 
     #[inline]

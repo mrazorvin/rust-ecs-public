@@ -195,10 +195,7 @@ impl SdlPlatform {
 
         imgui.set_platform_name(Some(format!("imgui-sdl2-support {}", env!("CARGO_PKG_VERSION"))));
 
-        SdlPlatform {
-            cursor_instance: None,
-            last_frame: Instant::now(),
-        }
+        SdlPlatform { cursor_instance: None, last_frame: Instant::now() }
     }
 
     /// Handles a SDL event.
@@ -231,17 +228,13 @@ impl SdlPlatform {
                 true
             }
 
-            Event::KeyDown {
-                scancode: Some(key), keymod, ..
-            } => {
+            Event::KeyDown { scancode: Some(key), keymod, .. } => {
                 handle_key_modifier(io, &keymod);
                 handle_key(io, &key, true);
                 true
             }
 
-            Event::KeyUp {
-                scancode: Some(key), keymod, ..
-            } => {
+            Event::KeyUp { scancode: Some(key), keymod, .. } => {
                 handle_key_modifier(io, &keymod);
                 handle_key(io, &key, false);
                 true
@@ -260,7 +253,12 @@ impl SdlPlatform {
     /// * mouse cursor is repositioned (if requested by imgui-rs)
     /// * current mouse cursor position is passed to imgui-rs
     /// * changes mouse cursor icon (if requested by imgui-rs)
-    pub fn prepare_frame(&mut self, context: &mut Context, window: &Window, event_pump: &EventPump) {
+    pub fn prepare_frame(
+        &mut self,
+        context: &mut Context,
+        window: &Window,
+        event_pump: &EventPump,
+    ) {
         let mouse_cursor = context.mouse_cursor();
         let io = context.io_mut();
 
@@ -314,13 +312,28 @@ impl SdlPlatform {
 }
 
 impl SdlPlatform {
-    fn handle_mouse_button(&mut self, io: &mut Io, button: &sdl2::mouse::MouseButton, pressed: bool) {
+    fn handle_mouse_button(
+        &mut self,
+        io: &mut Io,
+        button: &sdl2::mouse::MouseButton,
+        pressed: bool,
+    ) {
         match button {
-            sdl2::mouse::MouseButton::Left => io.add_mouse_button_event(imgui::MouseButton::Left, pressed),
-            sdl2::mouse::MouseButton::Right => io.add_mouse_button_event(imgui::MouseButton::Right, pressed),
-            sdl2::mouse::MouseButton::Middle => io.add_mouse_button_event(imgui::MouseButton::Middle, pressed),
-            sdl2::mouse::MouseButton::X1 => io.add_mouse_button_event(imgui::MouseButton::Extra1, pressed),
-            sdl2::mouse::MouseButton::X2 => io.add_mouse_button_event(imgui::MouseButton::Extra2, pressed),
+            sdl2::mouse::MouseButton::Left => {
+                io.add_mouse_button_event(imgui::MouseButton::Left, pressed)
+            }
+            sdl2::mouse::MouseButton::Right => {
+                io.add_mouse_button_event(imgui::MouseButton::Right, pressed)
+            }
+            sdl2::mouse::MouseButton::Middle => {
+                io.add_mouse_button_event(imgui::MouseButton::Middle, pressed)
+            }
+            sdl2::mouse::MouseButton::X1 => {
+                io.add_mouse_button_event(imgui::MouseButton::Extra1, pressed)
+            }
+            sdl2::mouse::MouseButton::X2 => {
+                io.add_mouse_button_event(imgui::MouseButton::Extra2, pressed)
+            }
             _ => {}
         }
     }

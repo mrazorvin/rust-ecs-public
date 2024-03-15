@@ -83,9 +83,8 @@ impl<T> SyncSparseArray<T> {
                 let requested_index = (id as f32 / BUCKET_DENSITY as f32).ceil() as usize;
                 while self.buckets.size() <= requested_index {
                     let bucket_ptr = Box::into_raw(Box::new(Bucket::new(0)));
-                    let (_, len) = self
-                        .buckets
-                        .push((AtomicU64::new(0), AtomicPtr::new(bucket_ptr)));
+                    let (_, len) =
+                        self.buckets.push((AtomicU64::new(0), AtomicPtr::new(bucket_ptr)));
                     unsafe { (*bucket_ptr).idx.store(len as u32 - 1, Ordering::Release) };
                 }
 
@@ -97,10 +96,7 @@ impl<T> SyncSparseArray<T> {
     }
 
     pub unsafe fn get_bits_unchecked(&self, id: usize) -> u64 {
-        self.buckets
-            .get_unchecked(get_bucket_index(id))
-            .0
-            .load(Ordering::Acquire)
+        self.buckets.get_unchecked(get_bucket_index(id)).0.load(Ordering::Acquire)
     }
 
     pub fn bucket_lock(&self, id: usize) -> BucketRefMut<T> {
@@ -128,11 +124,7 @@ impl<T> SyncSparseArray<T> {
                 .is_err()
         } {}
 
-        BucketRefMut {
-            array: self as *const _,
-            bucket: bucket_ptr,
-            bits: bucket_ref.0.get(),
-        }
+        BucketRefMut { array: self as *const _, bucket: bucket_ptr, bits: bucket_ref.0.get() }
     }
 
     // this function is unsafe because normally you should get reference
@@ -144,10 +136,7 @@ impl<T> SyncSparseArray<T> {
     // this function is unsafe because normally you should get reference
     // to bucket without locking, but because we are using double buffering it possible
     pub unsafe fn bucket_from_ref(&self, bucket_ref: &SparseBucketRaw<T>) -> BucketRef<T> {
-        BucketRef {
-            bits: bucket_ref.0.get(),
-            bucket_ptr: bucket_ref.1,
-        }
+        BucketRef { bits: bucket_ref.0.get(), bucket_ptr: bucket_ref.1 }
     }
 
     pub fn delete_in_place(&self, id: usize) -> Option<T> {
@@ -303,18 +292,10 @@ impl<T> Drop for BucketRefMut<T> {
             let min = (idx * BUCKET_DENSITY) as u32;
             let max = ((min as usize + BUCKET_DENSITY) - 1) as u32;
             if unsafe { min < (*self.array).min_existed_id.load(Ordering::Relaxed) } {
-                unsafe {
-                    (*self.array)
-                        .min_existed_id
-                        .fetch_min(min, Ordering::AcqRel)
-                };
+                unsafe { (*self.array).min_existed_id.fetch_min(min, Ordering::AcqRel) };
             }
             if unsafe { max > (*self.array).max_existed_id.load(Ordering::Relaxed) } {
-                unsafe {
-                    (*self.array)
-                        .max_existed_id
-                        .fetch_max(max, Ordering::AcqRel)
-                };
+                unsafe { (*self.array).max_existed_id.fetch_max(max, Ordering::AcqRel) };
             }
         }
         unsafe { (*self.bucket).guard.store(false, Ordering::Release) };
@@ -352,10 +333,7 @@ fn test_bucket_lock_api() {
     drop(bucket);
 
     // min-max changed only after we drop bucket
-    assert_eq!(
-        array.min_relaxed(),
-        (5000 / BUCKET_DENSITY * BUCKET_DENSITY)
-    );
+    assert_eq!(array.min_relaxed(), (5000 / BUCKET_DENSITY * BUCKET_DENSITY));
     assert_eq!(
         array.max_relaxed(),
         ((5000 / BUCKET_DENSITY * BUCKET_DENSITY) + BUCKET_DENSITY - 1)
@@ -374,10 +352,7 @@ fn test_bucket_lock_api() {
 
     let value = unsafe { bucket.get_unchecked(id) }.clone();
 
-    assert_eq!(
-        Some(value.clone()),
-        Some(String::from("value for id 123 with additional info"))
-    );
+    assert_eq!(Some(value.clone()), Some(String::from("value for id 123 with additional info")));
     assert_eq!(bucket.delete(id), Some(value.clone()));
     assert_eq!(array.min_relaxed(), u32::MAX as usize);
     assert_eq!(array.max_relaxed(), 0);
@@ -420,10 +395,7 @@ fn test_bucket_multithread_read_write() {
         t.join().unwrap();
     }
 
-    assert_eq!(
-        sparse.min_relaxed(),
-        ((100 / BUCKET_DENSITY) * BUCKET_DENSITY)
-    );
+    assert_eq!(sparse.min_relaxed(), ((100 / BUCKET_DENSITY) * BUCKET_DENSITY));
     assert_eq!(
         sparse.max_relaxed(),
         ((1240 / BUCKET_DENSITY) * BUCKET_DENSITY + BUCKET_DENSITY - 1)
@@ -457,12 +429,7 @@ fn test_bucket_multithread_read_write() {
     }
 
     let expection: Vec<_> = (100..1250).step_by(30).map(|_| 0).collect();
-    assert_eq!(
-        vec.iter()
-            .map(|v| v.load(Ordering::Acquire))
-            .collect::<Vec<_>>(),
-        expection
-    );
+    assert_eq!(vec.iter().map(|v| v.load(Ordering::Acquire)).collect::<Vec<_>>(), expection);
 
     #[allow(dropping_references)]
     drop(sparse);
@@ -478,10 +445,7 @@ fn test_bucket_multithread_delete() {
         sparse.set_in_place(i, Arc::new(i));
     }
 
-    assert_eq!(
-        sparse.min_relaxed(),
-        ((100 / BUCKET_DENSITY) * BUCKET_DENSITY)
-    );
+    assert_eq!(sparse.min_relaxed(), ((100 / BUCKET_DENSITY) * BUCKET_DENSITY));
     assert_eq!(
         sparse.max_relaxed(),
         ((1240 / BUCKET_DENSITY) * BUCKET_DENSITY + BUCKET_DENSITY - 1)
@@ -561,10 +525,9 @@ fn sync_sparse_array() {
     for data in 1..MAX_ITEMS_PER_ARRAY {
         let next_chunk = get_bucket_index(data);
         if current_chunk != next_chunk {
-            array.buckets.push((
-                AtomicU64::new(0),
-                AtomicPtr::new(Box::into_raw(Box::new(chunk_data))),
-            ));
+            array
+                .buckets
+                .push((AtomicU64::new(0), AtomicPtr::new(Box::into_raw(Box::new(chunk_data)))));
             chunk_data = Bucket::new(next_chunk as u32);
             chunk_index = 0;
             current_chunk = next_chunk;
@@ -573,10 +536,7 @@ fn sync_sparse_array() {
         chunk_data.slots[chunk_index] = MaybeUninit::new(data);
         chunk_index += 1;
     }
-    array.buckets.push((
-        AtomicU64::new(0),
-        AtomicPtr::new(Box::into_raw(Box::new(chunk_data))),
-    ));
+    array.buckets.push((AtomicU64::new(0), AtomicPtr::new(Box::into_raw(Box::new(chunk_data)))));
     let elapsed = insertion_time.elapsed().as_secs_f32();
     println!("Direct insertion: {}s", elapsed);
 

@@ -104,7 +104,8 @@ impl<T: SparseSlot> SparseArray<T> {
     #[inline]
     pub fn memory_info(&self) -> MemoryInfo {
         MemoryInfo {
-            used: (self.capacity() as usize) * core::mem::size_of::<T>() + std::mem::size_of::<Self>(),
+            used: (self.capacity() as usize) * core::mem::size_of::<T>()
+                + std::mem::size_of::<Self>(),
         }
     }
 }
@@ -177,11 +178,7 @@ macro_rules! bits {
 
 impl<T: SparseSlot> SparseArray<T> {
     pub fn data_hash_len(&self) -> u16 {
-        return if self.data_slots == 0 {
-            1
-        } else {
-            self.hash + MAX_COLLISION_PACK_DISTANCE
-        };
+        return if self.data_slots == 0 { 1 } else { self.hash + MAX_COLLISION_PACK_DISTANCE };
     }
 
     pub fn data_hash_disabled_len(&self) -> u16 {
@@ -208,7 +205,12 @@ impl<T: SparseSlot> SparseArray<T> {
                 let data_vec = unsafe { self.data.clone().to_vec(self.hash, self.data_capacity) };
                 self.hash = 2u16.saturating_pow((packed_capacity(requested_id).0 + 1) as u32);
                 let (data, data_capacity) = RawVecU16::from_vec(
-                    RawVecU16::resize_with(data_vec, self.data_hash_disabled_len(), Default::default).0,
+                    RawVecU16::resize_with(
+                        data_vec,
+                        self.data_hash_disabled_len(),
+                        Default::default,
+                    )
+                    .0,
                 );
                 self.data = data;
                 self.data_capacity = data_capacity;
@@ -278,7 +280,8 @@ impl<T: SparseSlot> SparseArray<T> {
             return SetOpResult::InsertPacked;
         }
 
-        let mut data_vec = unsafe { self.data.clone().to_vec(self.data_hash_len(), self.data_capacity) };
+        let mut data_vec =
+            unsafe { self.data.clone().to_vec(self.data_hash_len(), self.data_capacity) };
 
         if self.data_slots_end < self.data_hash_len() {
             data_vec[self.data_slots_end as usize] = data;
@@ -305,11 +308,7 @@ impl<T: SparseSlot> SparseArray<T> {
                 .iter()
                 .find(|prime| {
                     **prime >= (new_hash + (new_hash / 10).max(1).min(200))
-                        && (if !shrinking {
-                            **prime >= self.data_slots_end
-                        } else {
-                            true
-                        })
+                        && (if !shrinking { **prime >= self.data_slots_end } else { true })
                 })
                 .map(|prime| *prime)
                 .unwrap_or(new_hash + 1);
@@ -373,10 +372,13 @@ impl<T: SparseSlot> SparseArray<T> {
                         *index_in_collision_info = slot.get_id().get();
                     }
 
-                    let max_pack_distance = (packing_id % new_hash + MAX_COLLISION_PACK_DISTANCE) as usize;
-                    'packing_iter: for pack_index in ((packing_id % new_hash) as usize + 1)..max_pack_distance
+                    let max_pack_distance =
+                        (packing_id % new_hash + MAX_COLLISION_PACK_DISTANCE) as usize;
+                    'packing_iter: for pack_index in
+                        ((packing_id % new_hash) as usize + 1)..max_pack_distance
                     {
-                        let collision_info = unsafe { collisions_info.get_unchecked_mut(pack_index) };
+                        let collision_info =
+                            unsafe { collisions_info.get_unchecked_mut(pack_index) };
 
                         if *collision_info == 0 {
                             *collision_info = packing_id;
@@ -388,8 +390,9 @@ impl<T: SparseSlot> SparseArray<T> {
                             'hash_pack_offset: for pack_index_hash_index_offset in
                                 pack_index..collisions_info.len()
                             {
-                                if unsafe { *collisions_info.get_unchecked(pack_index_hash_index_offset) }
-                                    != 0
+                                if unsafe {
+                                    *collisions_info.get_unchecked(pack_index_hash_index_offset)
+                                } != 0
                                 {
                                     break 'hash_pack_offset;
                                 }
@@ -412,7 +415,8 @@ impl<T: SparseSlot> SparseArray<T> {
         // }
 
         if data_vec.len() < collisions_info.len() {
-            data_vec = RawVecU16::resize_with(data_vec, collisions_info.len() as u16, Default::default).0;
+            data_vec =
+                RawVecU16::resize_with(data_vec, collisions_info.len() as u16, Default::default).0;
         }
 
         //
@@ -500,7 +504,8 @@ impl<T: SparseSlot> SparseArray<T> {
 
         // shrink data_vec, this must be done after re-hasing
         if data_vec.len() > collisions_info.len() {
-            data_vec = RawVecU16::resize_with(data_vec, collisions_info.len() as u16, Default::default).0;
+            data_vec =
+                RawVecU16::resize_with(data_vec, collisions_info.len() as u16, Default::default).0;
         }
 
         // if (self.data_len > 10000) {
@@ -550,7 +555,8 @@ impl<T: SparseSlot> SparseArray<T> {
         } else {
             let mut target_found = false;
             for i in ((slot_index as usize) + 1)
-                ..((slot_index + MAX_COLLISION_PACK_DISTANCE) as usize).min(self.data_hash_len() as usize)
+                ..((slot_index + MAX_COLLISION_PACK_DISTANCE) as usize)
+                    .min(self.data_hash_len() as usize)
             {
                 let slot = unsafe { self.data.get_unchecked_mut(i) };
                 if slot.get_id() == id {
@@ -589,9 +595,12 @@ impl<T: SparseSlot> SparseArray<T> {
 
         if removed_index == slot_index && !self.hash_disabled {
             for i in ((slot_index as usize) + 1)
-                ..((slot_index + MAX_COLLISION_PACK_DISTANCE) as usize).min(self.data_hash_len() as usize)
+                ..((slot_index + MAX_COLLISION_PACK_DISTANCE) as usize)
+                    .min(self.data_hash_len() as usize)
             {
-                if (unsafe { self.data.get_unchecked_mut(i) }.get_id().get() % self.hash) == slot_index {
+                if (unsafe { self.data.get_unchecked_mut(i) }.get_id().get() % self.hash)
+                    == slot_index
+                {
                     let origin_slot = unsafe { &mut *self.data.ptr.add(slot_index as usize) };
                     let new_slot = unsafe { &mut *self.data.ptr.add(i) };
                     std::mem::swap(origin_slot, new_slot);
@@ -667,7 +676,9 @@ impl<T: SparseSlot> SparseArray<T> {
             }
 
             if requested_id == self.data_slots_min {
-                'min_lookup: for i in (self.data_slots_min / BITS_SIZE)..=(self.data_slots_max / BITS_SIZE) {
+                'min_lookup: for i in
+                    (self.data_slots_min / BITS_SIZE)..=(self.data_slots_max / BITS_SIZE)
+                {
                     let bits = unsafe { self.bits.get_unchecked_mut(i as usize) };
                     if *bits != 0 {
                         for bit_index in 0..BITS_SIZE {
@@ -723,16 +734,17 @@ impl<T: SparseSlot> Drop for SparseArray<T> {
     fn drop(&mut self) {
         if self.hash_disabled {
             let data_vec = unsafe {
-                self.data
-                    .clone()
-                    .to_vec(self.data_hash_disabled_len(), self.data_capacity)
+                self.data.clone().to_vec(self.data_hash_disabled_len(), self.data_capacity)
             };
-            let bits_vec = unsafe { self.bits.clone().to_vec(bits!(@len self), self.bits_capacity) };
+            let bits_vec =
+                unsafe { self.bits.clone().to_vec(bits!(@len self), self.bits_capacity) };
             drop(data_vec);
             drop(bits_vec);
         } else {
-            let data_vec = unsafe { self.data.clone().to_vec(self.data_hash_len(), self.data_capacity) };
-            let bits_vec = unsafe { self.bits.clone().to_vec(bits!(@len self), self.bits_capacity) };
+            let data_vec =
+                unsafe { self.data.clone().to_vec(self.data_hash_len(), self.data_capacity) };
+            let bits_vec =
+                unsafe { self.bits.clone().to_vec(bits!(@len self), self.bits_capacity) };
             drop(data_vec);
             drop(bits_vec);
         }
@@ -1137,10 +1149,7 @@ fn delete_multi_collision_hashing() {
     assert_eq!(unsafe { array.data.get_unchecked(47) }.get_id().get(), u16::MAX);
     assert_eq!(unsafe { array.data.get_unchecked(48) }.get_id().get(), u16::MAX);
 
-    assert_eq!(
-        array.delete(entity_id::invalid_new(1).id()),
-        Some(entity_id::invalid_new(1))
-    );
+    assert_eq!(array.delete(entity_id::invalid_new(1).id()), Some(entity_id::invalid_new(1)));
     assert_eq!(array.delete(entity98.id()), Some(entity98));
     assert_eq!(array.hash, 53);
     assert_eq!(array.data_slots, 44);
@@ -1175,10 +1184,7 @@ fn delete_no_collision() {
     assert_eq!(array.data_slots, 99);
     assert_eq!(array.data_slots_end, (99 * 99) + 1);
 
-    assert_eq!(
-        array.delete(unsafe { NonZeroU16::new_unchecked(99 * 99 + 1) }),
-        None
-    );
+    assert_eq!(array.delete(unsafe { NonZeroU16::new_unchecked(99 * 99 + 1) }), None);
     assert_eq!(
         array.delete(unsafe { NonZeroU16::new_unchecked(99 * 99) }),
         Some(entity_id::invalid_new(99 * 99))
@@ -1212,10 +1218,7 @@ fn set_bit_on_hash_disabled() {
     use crate::ecs::entity::entity_id;
     let mut array = SparseArray::new();
     array.hash_disabled = true;
-    assert_eq!(
-        array.set(entity_id::invalid_new(100)),
-        SetOpResult::UpsertHashDisabled
-    );
+    assert_eq!(array.set(entity_id::invalid_new(100)), SetOpResult::UpsertHashDisabled);
     assert_eq!(array.data_slots_max, 100);
     assert_eq!(array.data_slots_min, 100);
 }
@@ -1254,10 +1257,7 @@ fn delete_bit() {
     use crate::ecs::entity::entity_id;
 
     let mut array = SparseArray::new();
-    let _ = (
-        array.set(entity_id::invalid_new(100)),
-        array.set(entity_id::invalid_new(101)),
-    );
+    let _ = (array.set(entity_id::invalid_new(100)), array.set(entity_id::invalid_new(101)));
     assert_eq!((array.data_slots_min, array.data_slots_max), (100, 101));
 
     array.delete(entity_id::invalid_new(100).get_id());

@@ -20,6 +20,7 @@ use super::{
 pub fn render_loop(
     mut world: crate::ecs::world::World,
     cb: &dyn Fn(&mut World) -> (),
+    cb_frame_end: &dyn Fn(&mut World) -> (),
 ) -> Result<(), Box<dyn std::error::Error>> {
     let app = AppWindow::new("Game", 1920.0, 1080.0);
 
@@ -28,9 +29,7 @@ pub fn render_loop(
     let mut imgui = ::imgui::Context::create();
     imgui.set_ini_filename(None);
     imgui.set_log_filename(None);
-    imgui
-        .fonts()
-        .add_font(&[::imgui::FontSource::DefaultFontData { config: None }]);
+    imgui.fonts().add_font(&[::imgui::FontSource::DefaultFontData { config: None }]);
     let mut imgui_platform = sld2_imgui_support::SdlPlatform::init(&mut imgui);
     let mut imgui_renderer = glium_imgui_renderer::Renderer::init(&mut imgui, &app.display)?;
     let imgui_renderer_ptr = MutPtrLifetimeGuard::new(&mut imgui_renderer);
@@ -50,10 +49,7 @@ pub fn render_loop(
         textures: HashMap::new(),
     });
 
-    let loop_res = world.add_unique(Loop {
-        time: 0,
-        second: 0.0,
-    })?;
+    let loop_res = world.add_unique(Loop { time: 0, second: 0.0 })?;
 
     let mut event_pump = app.sdl.event_pump()?;
     let mut second = Instant::now();
@@ -85,8 +81,6 @@ pub fn render_loop(
         drop(ui_ptr);
         drop(display_ptr);
 
-        // #region ### frame end
-
         let draw_data = imgui.render();
         let passed = second.elapsed().as_secs_f32();
         if passed >= 1f32 {
@@ -112,9 +106,6 @@ pub fn render_loop(
         {
             unsafe { &mut *loop_res }.time = frame_duration.elapsed().as_micros();
         }
-        // #endregion
-
-        // #region ### events handling
 
         for event in event_pump.poll_iter() {
             match event {
@@ -122,7 +113,8 @@ pub fn render_loop(
                 ref event => imgui_platform.handle_event(&mut imgui, &event),
             };
         }
-        // #endregion
+
+        cb_frame_end(&mut world);
     }
 }
 
@@ -135,10 +127,7 @@ struct MutPtrLifetimeGuard<'a, T> {
 
 impl<'a, T> MutPtrLifetimeGuard<'a, T> {
     fn new(value: &'a mut T) -> MutPtrLifetimeGuard<'a, T> {
-        MutPtrLifetimeGuard {
-            ptr: value as *mut T,
-            _marker: PhantomData,
-        }
+        MutPtrLifetimeGuard { ptr: value as *mut T, _marker: PhantomData }
     }
 }
 
@@ -149,10 +138,7 @@ struct SharedPtrLifetimeGuard<'a, T> {
 
 impl<'a, T> SharedPtrLifetimeGuard<'a, T> {
     fn new(value: &'a T) -> SharedPtrLifetimeGuard<'a, T> {
-        SharedPtrLifetimeGuard {
-            ptr: value as *const T,
-            _marker: PhantomData,
-        }
+        SharedPtrLifetimeGuard { ptr: value as *const T, _marker: PhantomData }
     }
 }
 // #endregion

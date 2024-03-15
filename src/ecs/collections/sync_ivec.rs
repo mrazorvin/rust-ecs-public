@@ -10,11 +10,11 @@ use std::{
 };
 
 #[cfg(not(test))]
-static PREVIOUS_SNAPSHOTS: SyncVec<*const dyn FrameDisposable> = SyncVec::new();
+pub static PREVIOUS_SNAPSHOTS: SyncVec<*const dyn FrameDisposable> = SyncVec::new();
 
 #[cfg(test)]
 #[thread_local]
-static PREVIOUS_SNAPSHOTS: SyncVec<*const dyn FrameDisposable> = SyncVec::new();
+pub static PREVIOUS_SNAPSHOTS: SyncVec<*const dyn FrameDisposable> = SyncVec::new();
 
 // SAFETY: Fields ordering and their types between IVecSnapshot and IVecSnapshotUnsized must be same, then casting between IVecSnapshot<T, 0> -> IVecSnapshotUnsized<T> is safe
 

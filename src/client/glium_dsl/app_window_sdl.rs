@@ -49,10 +49,8 @@ impl AppWindow {
         }
 
         let units = AppUnits::HardwarePixels;
-        let hw_size = (
-            units.units_to_hw(pixel_ratio, width),
-            units.units_to_hw(pixel_ratio, height),
-        );
+        let hw_size =
+            (units.units_to_hw(pixel_ratio, width), units.units_to_hw(pixel_ratio, height));
 
         let display = video_subsystem
             .window(title, hw_size.0 as u32, hw_size.1 as u32)

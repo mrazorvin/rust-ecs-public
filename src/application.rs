@@ -16,7 +16,11 @@ pub fn start_app() {
         let module = tests.get(module_id.get());
         if let Some((_, tests)) = module {
             if let Some(test_func) = tests.get(test_id.get()) {
-                world.add_system_with_state(test_executor, Some(Box::new(*test_func)), Schedule::Update);
+                world.add_system_with_state(
+                    test_executor,
+                    Some(Box::new(*test_func)),
+                    Schedule::Update,
+                );
                 test_id.set(test_id.get() + 1);
             } else {
                 module_id.set(module_id.get() + 1);
@@ -26,7 +30,7 @@ pub fn start_app() {
         }
     };
 
-    crate::client::render_loop(world, &test_executor).unwrap()
+    crate::client::render_loop(world, &test_executor, &|_| {}).unwrap()
 }
 
 fn test_executor(sys: &mut world::System) -> system::Return {
