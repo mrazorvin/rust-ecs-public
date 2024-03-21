@@ -30,7 +30,7 @@ pub fn start_app() {
         }
     };
 
-    crate::client::render_loop(world, &test_executor, &|_| {}).unwrap()
+    crate::client::render_loop(world, &test_executor, &frame_dispose::disposer).unwrap()
 }
 
 fn test_executor(sys: &mut world::System) -> system::Return {

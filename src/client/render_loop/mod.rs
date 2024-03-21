@@ -55,13 +55,10 @@ pub fn render_loop(
     let mut second = Instant::now();
 
     loop {
-        // #region ### frame start
-
         let mut frame = app.display.draw();
         frame.clear_all((0.05, 0.05, 0.05, 0.0), 1.0, 1);
         imgui_platform.prepare_frame(&mut imgui, app.display.window(), &event_pump);
         let frame_duration = Instant::now();
-        // #endregion
 
         // raw pointer prevents `&mut` aliasing problem, when UI injected as resource
         //
@@ -94,8 +91,11 @@ pub fn render_loop(
             unsafe { &mut *loop_res }.time = frame_duration.elapsed().as_micros();
         }
 
-        let render_result =
-            unsafe { &mut *imgui_renderer_ptr.ptr }.render(unsafe { &mut *opengl }, draw_data);
+        let render_result = if draw_data.total_vtx_count != 0 {
+            unsafe { &mut *imgui_renderer_ptr.ptr }.render(unsafe { &mut *opengl }, draw_data)
+        } else {
+            Ok(())
+        };
         // buffer swap, on android may take ~2ms
         unsafe { &mut *opengl }.set_finish()?;
         // all results must be unwrapped after `frame.set_finish()` call, otherwise

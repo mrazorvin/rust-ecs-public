@@ -22,7 +22,11 @@ pub fn start_game() -> Result<(), Box<dyn std::error::Error>> {
     world.add_unique(Assets::default())?;
     world.add_unique(Audio { ctx: AudioContext::new() })?;
     world.add_unique(Light { pos: [0.0, 0.0] })?;
-    render_loop::render_loop(world, &|world| world.add_system(schedule, Schedule::Update), &|_| {})
+    render_loop::render_loop(
+        world,
+        &|world| world.add_system(schedule, Schedule::Update),
+        &frame_dispose::disposer,
+    )
 }
 
 impl ComponnetsResource for Sprite {}

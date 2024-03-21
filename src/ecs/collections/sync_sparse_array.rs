@@ -16,7 +16,7 @@ const BUCKETS_PER_ARRAY: usize = 128; // value must be module of 2
 const BITS_PER_BUCKET: usize = u64::BITS as usize;
 
 // Total amount of items that could be stored per bucket
-const BUCKET_DENSITY: usize = BITS_PER_BUCKET; // Currently this value MUST equals to bits count in AutomicU64
+pub const BUCKET_DENSITY: usize = BITS_PER_BUCKET; // Currently this value MUST equals to bits count in AutomicU64
 
 // Default size of every array should be ~ 1kb
 // first 4096 elements is stored in chunks by 64 items
@@ -37,8 +37,8 @@ pub fn get_bucket_index(id: usize) -> usize {
 
 // basically we could have timed bucket or simpel bucket
 
-pub type SparseBucket<T> = (AtomicU64, AtomicPtr<Bucket<T>>);
-pub type SparseBucketRaw<T> = (UnsafeCell<u64>, *mut Bucket<T>);
+pub type SparseBucket<T> = (AtomicU64, AtomicU64, AtomicPtr<Bucket<T>>);
+pub type SparseBucketRaw<T> = (UnsafeCell<u64>, UnsafeCell<u64>, *mut Bucket<T>);
 
 pub struct SyncSparseArray<T> {
     pub min_existed_id: AtomicU32,
@@ -46,6 +46,7 @@ pub struct SyncSparseArray<T> {
     pub min_updated_id: AtomicU32,
     pub max_updated_id: AtomicU32,
     pub components: *const Components<T>,
+    pub is_updated: AtomicBool,
     pub buckets: SyncVec<SparseBucket<T>>,
 }
 
@@ -58,6 +59,7 @@ pub fn sync_array<T>(components: Option<*const Components<T>>) -> SyncSparseArra
             Some(ptr) => ptr,
             None => std::ptr::null(),
         },
+        is_updated: AtomicBool::new(false),
         max_updated_id: AtomicU32::new(u32::MIN),
         min_existed_id: AtomicU32::new(u32::MAX),
         max_existed_id: AtomicU32::new(u32::MIN),
@@ -83,8 +85,11 @@ impl<T> SyncSparseArray<T> {
                 let requested_index = (id as f32 / BUCKET_DENSITY as f32).ceil() as usize;
                 while self.buckets.size() <= requested_index {
                     let bucket_ptr = Box::into_raw(Box::new(Bucket::new(0)));
-                    let (_, len) =
-                        self.buckets.push((AtomicU64::new(0), AtomicPtr::new(bucket_ptr)));
+                    let (_, len) = self.buckets.push((
+                        AtomicU64::new(0),
+                        AtomicU64::new(0),
+                        AtomicPtr::new(bucket_ptr),
+                    ));
                     unsafe { (*bucket_ptr).idx.store(len as u32 - 1, Ordering::Release) };
                 }
 
@@ -111,7 +116,7 @@ impl<T> SyncSparseArray<T> {
      *       you don't want to empty buckets everywhere
      */
     pub unsafe fn bucket_lock_from_ref(&self, bucket_ref: &SparseBucketRaw<T>) -> BucketRefMut<T> {
-        let bucket_ptr = bucket_ref.1;
+        let bucket_ptr = bucket_ref.2;
 
         while unsafe { (*bucket_ptr).guard.load(Ordering::Relaxed) } {
             std::hint::spin_loop()
@@ -124,7 +129,12 @@ impl<T> SyncSparseArray<T> {
                 .is_err()
         } {}
 
-        BucketRefMut { array: self as *const _, bucket: bucket_ptr, bits: bucket_ref.0.get() }
+        BucketRefMut {
+            array: self as *const _,
+            bucket: bucket_ptr,
+            bits: bucket_ref.0.get(),
+            updated_bits: bucket_ref.1.get(),
+        }
     }
 
     // this function is unsafe because normally you should get reference
@@ -136,14 +146,20 @@ impl<T> SyncSparseArray<T> {
     // this function is unsafe because normally you should get reference
     // to bucket without locking, but because we are using double buffering it possible
     pub unsafe fn bucket_from_ref(&self, bucket_ref: &SparseBucketRaw<T>) -> BucketRef<T> {
-        BucketRef { bits: bucket_ref.0.get(), bucket_ptr: bucket_ref.1 }
+        BucketRef { bits: bucket_ref.0.get(), bucket_ptr: bucket_ref.2 }
     }
 
-    pub fn delete_in_place(&self, id: usize) -> Option<T> {
+    pub fn delete_in_place(&self, id: usize) -> Option<T>
+    where
+        T: 'static,
+    {
         self.bucket_lock(id).delete(id)
     }
 
-    pub fn set_in_place(&self, id: usize, data: T) -> Option<T> {
+    pub fn set_in_place(&self, id: usize, data: T) -> Option<T>
+    where
+        T: 'static,
+    {
         self.bucket_lock(id).set(id, data)
     }
 
@@ -161,7 +177,7 @@ impl<T> Drop for SyncSparseArray<T> {
         for chunk in self.buckets.chunks() {
             for i in 0..chunk.len() {
                 let bucket_ref = &chunk[i];
-                let bucket_ptr = bucket_ref.1.load(Ordering::Acquire);
+                let bucket_ptr = bucket_ref.2.load(Ordering::Acquire);
                 let bits = bucket_ref.0.load(Ordering::Acquire);
 
                 for bit_index in 0..BUCKET_DENSITY {
@@ -201,10 +217,11 @@ impl<T> BucketRef<T> {
     }
 }
 
-pub struct BucketRefMut<T> {
+pub struct BucketRefMut<T: 'static> {
     array: *const SyncSparseArray<T>,
     bucket: *mut Bucket<T>,
     bits: *mut u64,
+    updated_bits: *mut u64,
 }
 
 impl<T> BucketRefMut<T> {
@@ -218,6 +235,7 @@ impl<T> BucketRefMut<T> {
 
         let slot_idx = get_slot_index(id);
         let is_new_value = (unsafe { *self.bits } & (1 << slot_idx)) == 0;
+        unsafe { *self.updated_bits |= 1 << get_slot_index(id) };
         if is_new_value {
             let slot_ref = unsafe { (*self.bucket).slots.get_unchecked_mut(slot_idx) };
             unsafe { (slot_ref as *mut MaybeUninit<T>).write(MaybeUninit::new(data)) }
@@ -287,17 +305,43 @@ impl<T> BucketRefMut<T> {
 
 impl<T> Drop for BucketRefMut<T> {
     fn drop(&mut self) {
-        if unsafe { *self.bits != 0 } {
-            let idx = unsafe { (*self.bucket).idx.load(Ordering::Acquire) as usize };
-            let min = (idx * BUCKET_DENSITY) as u32;
-            let max = ((min as usize + BUCKET_DENSITY) - 1) as u32;
-            if unsafe { min < (*self.array).min_existed_id.load(Ordering::Relaxed) } {
-                unsafe { (*self.array).min_existed_id.fetch_min(min, Ordering::AcqRel) };
+        if unsafe { *self.updated_bits != 0 } {
+            if unsafe { !(*self.array).is_updated.load(Ordering::Relaxed) } {
+                if let Ok(_) = unsafe {
+                    (*self.array).is_updated.compare_exchange(
+                        false,
+                        true,
+                        Ordering::AcqRel,
+                        Ordering::Relaxed,
+                    )
+                } {
+                    let components = unsafe { (&*self.array).components };
+                    if !components.is_null() {
+                        unsafe { (*components).touch() };
+                    }
+                }
             }
-            if unsafe { max > (*self.array).max_existed_id.load(Ordering::Relaxed) } {
-                unsafe { (*self.array).max_existed_id.fetch_max(max, Ordering::AcqRel) };
+
+            let idx = unsafe { (*self.bucket).idx.load(Ordering::Acquire) as usize };
+            let min_id = (idx * BUCKET_DENSITY) as u32;
+            let max_id = ((min_id as usize + BUCKET_DENSITY) - 1) as u32;
+            if unsafe { min_id < (*self.array).min_updated_id.load(Ordering::Acquire) } {
+                unsafe { (*self.array).min_updated_id.fetch_min(min_id, Ordering::AcqRel) };
+            }
+            if unsafe { max_id > (*self.array).max_updated_id.load(Ordering::Acquire) } {
+                unsafe { (*self.array).max_updated_id.fetch_max(max_id, Ordering::AcqRel) };
+            }
+
+            if unsafe { *self.bits != 0 } {
+                if unsafe { min_id < (*self.array).min_existed_id.load(Ordering::Acquire) } {
+                    unsafe { (*self.array).min_existed_id.fetch_min(min_id, Ordering::AcqRel) };
+                }
+                if unsafe { max_id > (*self.array).max_existed_id.load(Ordering::Acquire) } {
+                    unsafe { (*self.array).max_existed_id.fetch_max(max_id, Ordering::AcqRel) };
+                }
             }
         }
+
         unsafe { (*self.bucket).guard.store(false, Ordering::Release) };
     }
 }
@@ -487,7 +531,7 @@ fn sync_sparse_array_min_max() {
 #[test]
 #[cfg(not(miri))]
 fn sync_sparse_array() {
-    assert_eq!(std::mem::size_of::<SyncSparseArray<u128>>(), 1064);
+    assert_eq!(std::mem::size_of::<SyncSparseArray<u128>>(), 1584);
 
     let array: SyncSparseArray<_> = sync_array(None);
     let insertion_time = std::time::Instant::now();
@@ -510,7 +554,7 @@ fn sync_sparse_array() {
             &mut *array
                 .buckets
                 .get_unchecked(get_bucket_index(id))
-                .1
+                .2
                 .load(std::sync::atomic::Ordering::Relaxed)
         };
 
@@ -525,9 +569,11 @@ fn sync_sparse_array() {
     for data in 1..MAX_ITEMS_PER_ARRAY {
         let next_chunk = get_bucket_index(data);
         if current_chunk != next_chunk {
-            array
-                .buckets
-                .push((AtomicU64::new(0), AtomicPtr::new(Box::into_raw(Box::new(chunk_data)))));
+            array.buckets.push((
+                AtomicU64::new(0),
+                AtomicU64::new(0),
+                AtomicPtr::new(Box::into_raw(Box::new(chunk_data))),
+            ));
             chunk_data = Bucket::new(next_chunk as u32);
             chunk_index = 0;
             current_chunk = next_chunk;
@@ -536,7 +582,11 @@ fn sync_sparse_array() {
         chunk_data.slots[chunk_index] = MaybeUninit::new(data);
         chunk_index += 1;
     }
-    array.buckets.push((AtomicU64::new(0), AtomicPtr::new(Box::into_raw(Box::new(chunk_data)))));
+    array.buckets.push((
+        AtomicU64::new(0),
+        AtomicU64::new(0),
+        AtomicPtr::new(Box::into_raw(Box::new(chunk_data))),
+    ));
     let elapsed = insertion_time.elapsed().as_secs_f32();
     println!("Direct insertion: {}s", elapsed);
 
@@ -545,7 +595,7 @@ fn sync_sparse_array() {
             &mut *array
                 .buckets
                 .get_unchecked(get_bucket_index(id))
-                .1
+                .2
                 .load(std::sync::atomic::Ordering::Relaxed)
         };
 
@@ -565,7 +615,7 @@ fn sync_sparse_array() {
             &mut *array
                 .buckets
                 .get_unchecked(get_bucket_index(id))
-                .1
+                .2
                 .load(std::sync::atomic::Ordering::Relaxed)
         };
 

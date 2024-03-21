@@ -2,6 +2,7 @@ pub mod collections;
 pub mod components;
 pub mod devtools;
 pub mod entity;
+pub mod frame_dispose;
 pub mod integration_tests;
 pub mod logger;
 pub mod macros;
@@ -15,7 +16,7 @@ pub mod world;
 pub mod prelude {
     pub use super::components::Components;
     pub use super::entity;
-    #[allow(unused_imports)]
+    pub use super::frame_dispose;
     pub use super::query::*;
     pub use super::system;
     pub use super::view::*;
