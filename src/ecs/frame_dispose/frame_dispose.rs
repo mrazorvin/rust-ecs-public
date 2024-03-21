@@ -16,7 +16,7 @@ pub fn disposer(world: &mut World) {
 
     for chunk in PREVIOUS_SNAPSHOTS.chunks() {
         for i in 0..chunk.len() {
-            unsafe { (*chunk[i]).dispose() }
+            unsafe { (*chunk[i].data).dispose() }
         }
     }
     unsafe { PREVIOUS_SNAPSHOTS.reset() }

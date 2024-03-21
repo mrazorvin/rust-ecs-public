@@ -7,30 +7,34 @@ use std::{
     sync::atomic::{AtomicPtr, AtomicU32, AtomicU8, Ordering},
 };
 
-const SYNC_VEC_BUCKET_SIZE: usize = 64;
-
 #[repr(C)] // 16 bytes
-pub struct SyncVecChunk<T> {
+pub struct SyncVecChunk<T, const N: usize> {
     _non_zero: NonZeroU8,
     // {field}: u8
     raw_len: AtomicU8,
     len: AtomicU8,
     entries_size: AtomicU32,
-    next: AtomicPtr<SyncVecChunk<T>>,
-    pub values: UnsafeCell<[MaybeUninit<T>; SYNC_VEC_BUCKET_SIZE]>,
+    next: AtomicPtr<SyncVecChunk<T, N>>,
+    pub values: UnsafeCell<[MaybeUninit<T>; N]>,
 }
 
-unsafe impl<T> Send for SyncVecChunk<T> {}
-unsafe impl<T> Sync for SyncVecChunk<T> {}
+unsafe impl<T, const N: usize> Send for SyncVecChunk<T, N> {}
+unsafe impl<T, const N: usize> Sync for SyncVecChunk<T, N> {}
 
 #[repr(transparent)]
-pub struct SyncVec<T> {
-    pub root_chunk: SyncVecChunk<T>,
+pub struct SyncVec<T, const N: usize = 64> {
+    pub root_chunk: SyncVecChunk<T, N>,
+    pub _marker: PhantomData<T>,
 }
 
-impl<T> SyncVec<T> {
+impl<T, const N: usize> SyncVec<T, N> {
     pub const fn new() -> Self {
-        SyncVec { root_chunk: unsafe { SyncVecChunk::new() } }
+        SyncVec { root_chunk: unsafe { SyncVecChunk::new() }, _marker: PhantomData {} }
+    }
+
+    #[inline]
+    pub fn chunk_size(&self) -> usize {
+        N
     }
 
     #[inline]
@@ -53,9 +57,8 @@ impl<T> SyncVec<T> {
         let mut chunk_idx = 0;
         let mut chunk = &self.root_chunk;
         let free_index = 'find_free_index_and_chunk: loop {
-            let raw_len =
-                (SYNC_VEC_BUCKET_SIZE * chunk_idx) + chunk.raw_len.load(Ordering::Acquire) as usize;
-            while raw_len >= (SYNC_VEC_BUCKET_SIZE * (chunk_idx + 1)) {
+            let raw_len = (N * chunk_idx) + chunk.raw_len.load(Ordering::Acquire) as usize;
+            while raw_len >= (N * (chunk_idx + 1)) {
                 let mut chunk_ptr = chunk.next.load(Ordering::Acquire);
                 if chunk_ptr.is_null() {
                     chunk_ptr = unsafe { chunk.try_init_next_chunk() };
@@ -64,7 +67,7 @@ impl<T> SyncVec<T> {
                 chunk_idx += 1;
             }
             let next_raw_len = chunk.raw_len.fetch_add(1, Ordering::Release) + 1;
-            if next_raw_len > SYNC_VEC_BUCKET_SIZE as u8 {
+            if next_raw_len > N as u8 {
                 chunk.raw_len.fetch_sub(1, Ordering::Release);
                 continue 'find_free_index_and_chunk;
             }
@@ -81,7 +84,7 @@ impl<T> SyncVec<T> {
 
     // iterator over chunks, this function unsafe just to make sure
     // that user understand contract for such iteration
-    pub fn chunks(&self) -> ChunksIterator<'_, T> {
+    pub fn chunks(&self) -> ChunksIterator<'_, T, N> {
         ChunksIterator {
             chunk: &self.root_chunk as *const _,
             iterations: self.size(),
@@ -91,9 +94,7 @@ impl<T> SyncVec<T> {
 
     // this function doesn't return real amount
     pub unsafe fn chunks_size(&self) -> usize {
-        ((self.root_chunk.entries_size.load(Ordering::Acquire) as f32)
-            / SYNC_VEC_BUCKET_SIZE as f32)
-            .ceil() as usize
+        ((self.root_chunk.entries_size.load(Ordering::Acquire) as f32) / N as f32).ceil() as usize
     }
 
     // this function reseat length of all chunks:
@@ -115,7 +116,7 @@ impl<T> SyncVec<T> {
 
     #[inline]
     pub unsafe fn get_unchecked(&self, index: usize) -> &T {
-        if index < SYNC_VEC_BUCKET_SIZE {
+        if index < N {
             unsafe {
                 return (*self.root_chunk.values.get()).get_unchecked(index).assume_init_ref();
             };
@@ -124,20 +125,18 @@ impl<T> SyncVec<T> {
         let mut chunk = &self.root_chunk;
         let mut len = chunk.len.load(Ordering::Acquire) as usize;
         let mut chunk_idx = 0;
-        while len >= SYNC_VEC_BUCKET_SIZE && index >= (len + SYNC_VEC_BUCKET_SIZE * chunk_idx) {
+        while len >= N && index >= (len + N * chunk_idx) {
             let chunk_ptr = chunk.next.load(Ordering::Acquire);
             chunk = unsafe { &*chunk_ptr };
             chunk_idx += 1;
             len = chunk.raw_len.load(Ordering::Acquire) as usize
         }
 
-        unsafe {
-            (*chunk.values.get()).get_unchecked(index % SYNC_VEC_BUCKET_SIZE).assume_init_ref()
-        }
+        unsafe { (*chunk.values.get()).get_unchecked(index % N).assume_init_ref() }
     }
 }
 
-impl<T> Drop for SyncVecChunk<T> {
+impl<T, const N: usize> Drop for SyncVecChunk<T, N> {
     fn drop(&mut self) {
         let next_ptr = self.next.load(Ordering::Acquire);
 
@@ -152,8 +151,8 @@ impl<T> Drop for SyncVecChunk<T> {
     }
 }
 
-impl<T> SyncVecChunk<T> {
-    const unsafe fn new() -> SyncVecChunk<T> {
+impl<T, const N: usize> SyncVecChunk<T, N> {
+    const unsafe fn new() -> SyncVecChunk<T, N> {
         SyncVecChunk {
             _non_zero: NonZeroU8::new_unchecked(1),
             next: AtomicPtr::new(std::ptr::null_mut()),
@@ -170,7 +169,7 @@ impl<T> SyncVecChunk<T> {
         unsafe { &*((self.values.get() as *const T).add(index)) }
     }
 
-    unsafe fn try_init_next_chunk(&self) -> *mut SyncVecChunk<T> {
+    unsafe fn try_init_next_chunk(&self) -> *mut SyncVecChunk<T, N> {
         let next_chunk = Box::into_raw(Box::new(SyncVecChunk::new()));
         let swap_result = self.next.compare_exchange(
             std::ptr::null_mut(),
@@ -189,14 +188,14 @@ impl<T> SyncVecChunk<T> {
     }
 }
 
-pub struct ChunksIterator<'a, T> {
-    pub chunk: *const SyncVecChunk<T>,
+pub struct ChunksIterator<'a, T, const N: usize> {
+    pub chunk: *const SyncVecChunk<T, N>,
     pub iterations: usize,
     pub _marker: PhantomData<&'a T>,
 }
 
-impl<'a, T> Iterator for ChunksIterator<'a, T> {
-    type Item = ChunkIteratorItem<'a, T>;
+impl<'a, T, const N: usize> Iterator for ChunksIterator<'a, T, N> {
+    type Item = ChunkIteratorItem<'a, T, N>;
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
@@ -204,30 +203,30 @@ impl<'a, T> Iterator for ChunksIterator<'a, T> {
             return None;
         }
 
-        let len = self.iterations.min(SYNC_VEC_BUCKET_SIZE);
+        let len = self.iterations.min(N);
         let chunk = unsafe { &(*self.chunk) };
 
-        self.iterations = self.iterations.saturating_sub(SYNC_VEC_BUCKET_SIZE);
+        self.iterations = self.iterations.saturating_sub(N);
         self.chunk = chunk.next.load(Ordering::Acquire);
 
         Some(ChunkIteratorItem { chunk, len, idx: 0 })
     }
 }
 
-pub struct ChunkIteratorItem<'a, T> {
-    pub chunk: &'a SyncVecChunk<T>,
+pub struct ChunkIteratorItem<'a, T, const N: usize> {
+    pub chunk: &'a SyncVecChunk<T, N>,
     pub idx: usize,
     pub len: usize,
 }
 
-impl<'a, T> ChunkIteratorItem<'a, T> {
+impl<'a, T, const N: usize> ChunkIteratorItem<'a, T, N> {
     #[inline]
     pub fn len(&self) -> usize {
         self.len
     }
 }
 
-impl<'a, T> Index<usize> for ChunkIteratorItem<'a, T> {
+impl<'a, T, const N: usize> Index<usize> for ChunkIteratorItem<'a, T, N> {
     type Output = T;
 
     #[inline]
@@ -237,24 +236,28 @@ impl<'a, T> Index<usize> for ChunkIteratorItem<'a, T> {
 }
 
 #[derive(Debug)]
-pub struct ZipRangeIterator {
+pub struct ZipRangeIterator<const N: usize> {
     first: bool,
     idx: usize,
     max_idx: usize,
 }
 
-impl ZipRangeIterator {
-    pub fn new() -> ZipRangeIterator {
+impl<const N: usize> ZipRangeIterator<N> {
+    pub fn new() -> ZipRangeIterator<N> {
         ZipRangeIterator { idx: 0, max_idx: usize::MAX, first: true }
+    }
+
+    pub fn chunk_size(&self) -> usize {
+        N
     }
 
     #[inline]
     pub fn add<'a, T>(
         &mut self,
-        sync_vec: &'a SyncVec<T>,
+        sync_vec: &'a SyncVec<T, N>,
         min: usize,
         max: usize,
-    ) -> ChunksIterator<'a, T> {
+    ) -> ChunksIterator<'a, T, N> {
         self.max_idx = self
             .max_idx
             .min(sync_vec.root_chunk.entries_size.load(Ordering::Acquire) as usize)
@@ -266,8 +269,8 @@ impl ZipRangeIterator {
     }
 }
 
-impl Iterator for ZipRangeIterator {
-    type Item = ZipRangeChunk;
+impl<const N: usize> Iterator for ZipRangeIterator<N> {
+    type Item = ZipRangeChunk<N>;
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
@@ -278,25 +281,25 @@ impl Iterator for ZipRangeIterator {
         let result = ZipRangeChunk {
             first: self.first,
             start: self.idx,
-            end: (self.idx + SYNC_VEC_BUCKET_SIZE).min(self.max_idx),
+            end: (self.idx + N).min(self.max_idx),
         };
 
-        self.idx += SYNC_VEC_BUCKET_SIZE;
+        self.idx += N;
         self.first = false;
 
         Some(result)
     }
 }
 
-pub struct ZipRangeChunk {
+pub struct ZipRangeChunk<const N: usize> {
     first: bool,
     start: usize,
     end: usize,
 }
 
-impl ZipRangeChunk {
+impl<const N: usize> ZipRangeChunk<N> {
     pub fn bucket_index(&self) -> usize {
-        self.start / SYNC_VEC_BUCKET_SIZE
+        self.start / N
     }
 
     #[inline]
@@ -307,10 +310,10 @@ impl ZipRangeChunk {
     #[inline]
     pub fn progress<'b, T>(
         &mut self,
-        chunks_iterator: &mut ChunksIterator<'b, T>,
-    ) -> ChunkIteratorItem<'b, T> {
-        if self.first && self.start / SYNC_VEC_BUCKET_SIZE != 0 {
-            for _ in 0..self.start / SYNC_VEC_BUCKET_SIZE {
+        chunks_iterator: &mut ChunksIterator<'b, T, N>,
+    ) -> ChunkIteratorItem<'b, T, N> {
+        if self.first && self.start / N != 0 {
+            for _ in 0..self.start / N {
                 chunks_iterator.next();
             }
         }
@@ -320,9 +323,9 @@ impl ZipRangeChunk {
 
 #[test]
 fn iter() {
-    let sync_vec1 = SyncVec::new();
-    let sync_vec2 = SyncVec::new();
-    for i in 0..SYNC_VEC_BUCKET_SIZE {
+    let sync_vec1: SyncVec<_, 64> = SyncVec::new();
+    let sync_vec2: SyncVec<_, 64> = SyncVec::new();
+    for i in 0..sync_vec1.chunk_size() {
         sync_vec1.push(i);
         sync_vec2.push(Box::new(i));
     }
@@ -335,15 +338,15 @@ fn iter() {
         }
     }
 
-    assert_eq!(&result_vec, &(0..SYNC_VEC_BUCKET_SIZE).collect::<Vec<usize>>());
+    assert_eq!(&result_vec, &(0..sync_vec1.chunk_size()).collect::<Vec<usize>>());
 
     let mut result_vec = Vec::new();
 
     // #region ### multi-vec range iterator
     let mut range1_iter = ZipRangeIterator::new();
 
-    let chunk1_iter = &mut range1_iter.add(&sync_vec1, 20, SYNC_VEC_BUCKET_SIZE);
-    let chunk2_iter = &mut range1_iter.add(&sync_vec2, 30, SYNC_VEC_BUCKET_SIZE + 10);
+    let chunk1_iter = &mut range1_iter.add(&sync_vec1, 20, sync_vec1.chunk_size());
+    let chunk2_iter = &mut range1_iter.add(&sync_vec2, 30, sync_vec2.chunk_size() + 10);
     for mut chunk in range1_iter {
         let chunk_1 = chunk.progress(chunk1_iter);
         let chunk_2 = chunk.progress(chunk2_iter);
@@ -354,30 +357,27 @@ fn iter() {
     }
     // #endregion
 
-    assert_eq!(&result_vec, &(30..SYNC_VEC_BUCKET_SIZE).map(|v| v + v).collect::<Vec<usize>>())
+    assert_eq!(&result_vec, &(30..sync_vec1.chunk_size()).map(|v| v + v).collect::<Vec<usize>>())
 }
 
 #[test]
 fn sync_vec_size() {
-    assert_eq!(std::mem::size_of::<SyncVecChunk<()>>(), 16);
+    assert_eq!(std::mem::size_of::<SyncVecChunk<(), 64>>(), 16);
     assert_eq!(std::mem::size_of::<Option<SyncVec<()>>>(), 16);
-    assert_eq!(std::mem::size_of::<Option<ChunkIteratorItem<u128>>>(), 24);
+    assert_eq!(std::mem::size_of::<Option<ChunkIteratorItem<u128, 64>>>(), 24);
 
-    assert_eq!(
-        std::mem::size_of::<SyncVec<u8>>(),
-        std::mem::size_of::<SyncVec<()>>() + SYNC_VEC_BUCKET_SIZE
-    );
+    assert_eq!(std::mem::size_of::<SyncVec<u8>>(), std::mem::size_of::<SyncVec<()>>() + 64);
 
     assert_eq!(
         std::mem::size_of::<SyncVec<(u8, u8, u8)>>(),
-        std::mem::size_of::<SyncVec<()>>() + SYNC_VEC_BUCKET_SIZE * 3
+        std::mem::size_of::<SyncVec<()>>() + 64 * 3
     );
 }
 
 #[test]
 fn single_thread_push_and_dealloc() {
-    let sync_vec = SyncVec::new();
-    for i in 0..SYNC_VEC_BUCKET_SIZE {
+    let sync_vec: SyncVec<_, 64> = SyncVec::new();
+    for i in 0..sync_vec.chunk_size() {
         sync_vec.push(Box::new(i));
     }
 
@@ -388,8 +388,8 @@ fn single_thread_push_and_dealloc() {
 #[test]
 fn multi_thread_push_and_dealloc() {
     use std::sync::{atomic::AtomicUsize, Arc};
-
-    let sync_vec = Arc::new(SyncVec::new());
+    let xx: &dyn Sync = &SyncVec::<u32>::new();
+    let sync_vec: Arc<SyncVec<Arc<u32>, 64>> = Arc::new(SyncVec::new());
     static EXPECTED_SIZE: AtomicUsize = AtomicUsize::new(0);
     let threads: Vec<_> = (0..50)
         .map(|v| {
@@ -407,17 +407,17 @@ fn multi_thread_push_and_dealloc() {
         t.join().unwrap()
     }
 
-    assert_eq!(unsafe { sync_vec.chunks_size() }, sync_vec.size() / SYNC_VEC_BUCKET_SIZE + 1);
+    assert_eq!(unsafe { sync_vec.chunks_size() }, sync_vec.size() / sync_vec.chunk_size() + 1);
     assert_eq!(sync_vec.size(), EXPECTED_SIZE.load(Ordering::Acquire));
 }
 
 #[test]
 fn reset() {
-    let sync_vec = SyncVec::new();
+    let sync_vec: SyncVec<_, 64> = SyncVec::new();
     for i in 0..600 {
         sync_vec.push(i);
     }
-    assert_eq!(unsafe { sync_vec.chunks_size() }, 600 / SYNC_VEC_BUCKET_SIZE + 1);
+    assert_eq!(unsafe { sync_vec.chunks_size() }, 600 / sync_vec.chunk_size() + 1);
 
     unsafe { sync_vec.reset() };
 
@@ -442,13 +442,13 @@ fn reset() {
         }
     }
 
-    assert_eq!(unsafe { sync_vec.chunks_size() }, 500 / SYNC_VEC_BUCKET_SIZE + 1);
+    assert_eq!(unsafe { sync_vec.chunks_size() }, 500 / sync_vec.chunk_size() + 1);
     assert_eq!(&(0..500).rev().collect::<Vec<usize>>(), &vec);
 }
 
 #[test]
 fn get() {
-    let sync_vec = SyncVec::new();
+    let sync_vec: SyncVec<_, 64> = SyncVec::new();
     let mut vec = Vec::new();
     for i in 0..500 {
         sync_vec.push(i);

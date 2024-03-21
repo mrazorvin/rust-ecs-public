@@ -1,20 +1,24 @@
-use super::{disposable::FrameDisposable, sync_vec::SyncVec};
+use super::{
+    disposable::{DisposeItem, FrameDisposable},
+    sync_vec::SyncVec,
+};
 use std::{
     alloc::{dealloc, Layout},
     cell::UnsafeCell,
     fmt::Debug,
     marker::PhantomData,
     mem::{ManuallyDrop, MaybeUninit},
+    ops::{Deref, DerefMut},
     sync::atomic::{AtomicBool, AtomicPtr, Ordering},
     usize,
 };
 
 #[cfg(not(test))]
-pub static PREVIOUS_SNAPSHOTS: SyncVec<*const dyn FrameDisposable> = SyncVec::new();
+pub static PREVIOUS_SNAPSHOTS: SyncVec<DisposeItem> = SyncVec::new();
 
 #[cfg(test)]
 #[thread_local]
-pub static PREVIOUS_SNAPSHOTS: SyncVec<*const dyn FrameDisposable> = SyncVec::new();
+pub static PREVIOUS_SNAPSHOTS: SyncVec<DisposeItem> = SyncVec::new();
 
 // SAFETY: Fields ordering and their types between IVecSnapshot and IVecSnapshotUnsized must be same, then casting between IVecSnapshot<T, 0> -> IVecSnapshotUnsized<T> is safe
 
@@ -188,10 +192,11 @@ impl<T> IVec<T> {
                     if self.is_disposable_and_pinned && !self.need_disposing.load(Ordering::Acquire)
                     {
                         self.need_disposing.store(true, Ordering::Relaxed);
-                        PREVIOUS_SNAPSHOTS
-                            .push(unsafe { std::mem::transmute::<&_, &'static IVec<T>>(self) }
+                        PREVIOUS_SNAPSHOTS.push(DisposeItem {
+                            data: unsafe { std::mem::transmute::<&_, &'static IVec<T>>(self) }
                                 as &dyn FrameDisposable
-                                as *const _);
+                                as *const _,
+                        });
                     }
                     let new_vec = unsafe { &*(new_vec_fat_ptr as *mut IVecSnapshotUnsized<T>) };
                     break unsafe { new_vec.data.get_unchecked(root.len) };
@@ -569,7 +574,7 @@ fn ivec_mutli_global_gc() {
 
             for chunk in PREVIOUS_SNAPSHOTS.chunks() {
                 for i in 0..chunk.len() {
-                    unsafe { (*chunk[i]).dispose() }
+                    unsafe { (*chunk[i].data).dispose() }
                 }
             }
             unsafe { PREVIOUS_SNAPSHOTS.reset() }

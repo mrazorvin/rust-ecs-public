@@ -1,4 +1,4 @@
-use super::sync_vec::SyncVec;
+use super::sync_vec::{SyncVec, ZipRangeIterator};
 use std::{
     num::NonZeroU32,
     sync::atomic::{AtomicBool, AtomicU32, AtomicU8, Ordering},
@@ -17,7 +17,7 @@ struct FreeKeysMeta {
 struct SyncSlotMap<T> {
     free_keys_store_idx: AtomicU32,
     free_keys_meta: [FreeKeysMeta; 2],
-    free_keys: [SyncVec<u32>; 2],
+    free_keys: [SyncVec<AtomicU32>; 2],
     slots: SyncVec<T>,
 }
 
@@ -49,9 +49,9 @@ impl<T> SyncSlotMap<T> {
 
         // 1. increasing max by 1 for bad buffer, only take one additional slot, nothig more, so it's probably safe because we just skip one empty slot, even if it's alredy used, in worth keys we could lose single key because there we will interate only up to max
         // 2. increasing current for is worst because we have hihger chnace to skip keys, because we use this as for filtering
-        loop {
-            let (store_key, store_vec, store_meta) = self.get_load_vec();
-            let (load_key, load_store, load_meta) = self.get_store_vec();
+        'lookup_free_key: loop {
+            let (load_key, load_vec, load_meta) = self.get_load_vec();
+            let (store_key, _, store_meta) = self.get_store_vec();
 
             // load vec is drained
             if load_meta
@@ -63,34 +63,43 @@ impl<T> SyncSlotMap<T> {
                 // no free keys in store vec
                 if store_meta.store_iter.load(Ordering::Acquire) == 0 {
                     break None;
-                } else {
-                    // doesn't matter if 
-                    let _ = self.free_keys_store_idx.compare_exchange(
-                        store_key,
+                }
+                // swap vecs
+                else {
+                    if let Ok(_) = self.free_keys_store_idx.compare_exchange(
                         load_key,
+                        store_key,
                         Ordering::AcqRel,
                         Ordering::Relaxed,
-                    );
-                    continue;
+                    ) {
+                        // reset counters to 0
+                        store_meta.load_iter.store(0, Ordering::Release);
+                        load_meta.store_iter.store(0, Ordering::Release);
+                    }
+
+                    // doesn't matter if change was successful or not in both caseses we must repeat process again
+                    continue 'lookup_free_key;
                 }
             }
 
-            // load vec is drained and not free keys in store vec
-            if store_meta.store_iter.load(Ordering::Acquire) == 0
-                && load_meta
-                    .store_iter
-                    .load(Ordering::Acquire)
-                    .saturating_sub(load_meta.load_iter.load(Ordering::Acquire))
-                    == 0
-            {}
+            let mut iter = ZipRangeIterator::new();
+            let mut load_iter = &mut iter.add(
+                &load_vec,
+                load_meta.load_iter.load(Ordering::Acquire) as usize,
+                u32::MAX as usize,
+            );
+            for mut chunk in iter {
+                let vec = chunk.progress(&mut load_iter);
+                for i in chunk.complete() {
+                   if vec[i].load(Ordering::Acquire) == 0 {
 
-            // iterate over current with rnage iter and find first non-zero key
-            // compare-swap with zero, current index by 1, ^ comare cur with last in condition above
-            // return value from this index
+                   }
+                }
+            }
         }
     }
 
-    pub fn get_load_vec(&self) -> (u32, &SyncVec<u32>, &FreeKeysMeta) {
+    pub fn get_load_vec(&self) -> (u32, &SyncVec<AtomicU32>, &FreeKeysMeta) {
         let cur_key = self.free_keys_store_idx.load(Ordering::Acquire);
         unsafe {
             (
@@ -101,7 +110,7 @@ impl<T> SyncSlotMap<T> {
         }
     }
 
-    pub fn get_store_vec(&self) -> (u32, &SyncVec<u32>, &FreeKeysMeta) {
+    pub fn get_store_vec(&self) -> (u32, &SyncVec<AtomicU32>, &FreeKeysMeta) {
         let next_key = self.free_keys_store_idx.load(Ordering::Acquire) + 1;
         unsafe {
             (

@@ -18,6 +18,9 @@ use std::{
 // this and possible some other functions required
 // additional trait bound than just any
 // for example disposing/is_changed etc...
+
+pub static XX: Vec<TypeId> = Vec::new();
+
 pub static CHANGED_COMPONENTS: SyncVec<TypeId> = SyncVec::new();
 
 pub struct Components<T: Sized> {
