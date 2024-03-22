@@ -153,6 +153,10 @@ impl<T, const N: usize> SyncVec<T, N> {
 
         unsafe { (*chunk.values.get()).get_unchecked_mut(index % N).assume_init_mut() }
     }
+
+    pub fn root_values(&self) -> &[T; N] {
+        unsafe { &*(self.root_chunk.values.get() as *const [T; N]) }
+    }
 }
 
 impl<T, const N: usize> Drop for SyncVecChunk<T, N> {
@@ -297,7 +301,7 @@ impl<const N: usize> Iterator for ZipRangeIterator<N> {
         }
 
         let result = if self.first {
-            let end = (self.idx + N).min(self.idx / 64 * 64 + N);
+            let end = (self.idx + N).min(self.idx / N * N + N);
             let result = ZipRangeChunk {
                 //
                 first: true,
@@ -333,8 +337,8 @@ impl<const N: usize> ZipRangeChunk<N> {
     }
 
     #[inline]
-    pub fn complete(self) -> std::ops::Range<usize> {
-        (self.start % 64)..(self.end - self.start / 64 * 64)
+    pub fn complete(&self) -> std::ops::Range<usize> {
+        (self.start % N)..(self.end - self.start / N * N)
     }
 
     #[inline]

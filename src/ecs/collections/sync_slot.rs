@@ -40,7 +40,7 @@ fn get_keys_index(value: u32) -> usize {
 }
 
 impl<T> SyncSlotMap<T> {
-    pub fn new() -> SyncSlotMap<T> {
+    pub const fn new() -> SyncSlotMap<T> {
         SyncSlotMap {
             free_keys_store_idx: AtomicU32::new(0),
             free_keys: [SyncVec::new(), SyncVec::new()],
@@ -233,6 +233,85 @@ impl<T> SyncSlotMap<T> {
             )
         }
     }
+}
+
+#[test]
+fn slot_map_async() {
+    use std::sync::{Arc, Mutex};
+
+    static slot_map: SyncSlotMap<u32> = SyncSlotMap::new();
+    let vec = Arc::new(Mutex::new(Vec::<u32>::new()));
+
+    let vec1 = Arc::clone(&vec);
+    let t1 = std::thread::spawn(move || {
+        for i in 0..50 {
+            std::thread::sleep(std::time::Duration::from_millis(1));
+            vec1.lock().unwrap().push(slot_map.push(i).as_u32());
+        }
+    });
+
+    let vec2 = Arc::clone(&vec);
+    let t2 = std::thread::spawn(move || {
+        for i in 50..100 {
+            std::thread::sleep(std::time::Duration::from_millis(1));
+            vec2.lock().unwrap().push(slot_map.push(i).as_u32());
+        }
+    });
+
+    t1.join().unwrap();
+    t2.join().unwrap();
+
+    let expect = vec.lock().unwrap().iter().cloned().collect::<Vec<u32>>();
+    assert_eq!(expect, (1..101).into_iter().collect::<Vec<u32>>());
+    vec.lock().unwrap().clear();
+
+    let t1 = std::thread::spawn(move || {
+        for i in 1..51 {
+            std::thread::sleep(std::time::Duration::from_millis(1));
+            slot_map.delete(unsafe { std::mem::transmute(i) });
+        }
+    });
+
+    let t2 = std::thread::spawn(move || {
+        for i in 51..101 {
+            std::thread::sleep(std::time::Duration::from_millis(2));
+            slot_map.delete(unsafe { std::mem::transmute(i) });
+        }
+    });
+
+    assert_eq!(slot_map.slots.size(), 100);
+    t1.join().unwrap();
+    t2.join().unwrap();
+
+    let mut new_expect = slot_map.get_store_vec().1.root_values()[0..100]
+        .iter()
+        .map(|v| v.load(Ordering::Acquire))
+        .collect::<Vec<_>>();
+    new_expect.sort_by_key(|v| *v);
+    assert_eq!(new_expect, (1..101).into_iter().collect::<Vec<u32>>());
+
+    let vec1 = Arc::clone(&vec);
+    let t1 = std::thread::spawn(move || {
+        for i in 0..50 {
+            std::thread::sleep(std::time::Duration::from_millis(2));
+            vec1.lock().unwrap().push(slot_map.push(i).as_u32());
+        }
+    });
+
+    let vec2 = Arc::clone(&vec);
+    let t2 = std::thread::spawn(move || {
+        for i in 50..100 {
+            std::thread::sleep(std::time::Duration::from_millis(2));
+            vec2.lock().unwrap().push(slot_map.push(i).as_u32());
+        }
+    });
+
+    t1.join().unwrap();
+    t2.join().unwrap();
+    vec.lock().unwrap().sort_by_key(|v| *v);
+    let expect = vec.lock().unwrap().iter().cloned().collect::<Vec<u32>>();
+    assert_eq!(expect.len(), 100);
+    assert_eq!(expect, (1..101).into_iter().collect::<Vec<u32>>());
 }
 
 #[test]
