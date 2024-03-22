@@ -4,15 +4,13 @@ use std::{
     mem::MaybeUninit,
     num::NonZeroU8,
     ops::Index,
-    sync::atomic::{AtomicPtr, AtomicU32, AtomicU8, Ordering},
+    sync::atomic::{AtomicPtr, AtomicU16, AtomicU32, AtomicU8, Ordering},
 };
 
 #[repr(C)] // 16 bytes
 pub struct SyncVecChunk<T, const N: usize> {
-    _non_zero: NonZeroU8,
-    // {field}: u8
-    raw_len: AtomicU8,
-    len: AtomicU8,
+    raw_len: AtomicU16,
+    len: AtomicU16,
     entries_size: AtomicU32,
     next: AtomicPtr<SyncVecChunk<T, N>>,
     pub values: UnsafeCell<[MaybeUninit<T>; N]>,
@@ -67,7 +65,7 @@ impl<T, const N: usize> SyncVec<T, N> {
                 chunk_idx += 1;
             }
             let next_raw_len = chunk.raw_len.fetch_add(1, Ordering::Release) + 1;
-            if next_raw_len > N as u8 {
+            if next_raw_len > N as u16 {
                 chunk.raw_len.fetch_sub(1, Ordering::Release);
                 continue 'find_free_index_and_chunk;
             }
@@ -134,6 +132,27 @@ impl<T, const N: usize> SyncVec<T, N> {
 
         unsafe { (*chunk.values.get()).get_unchecked(index % N).assume_init_ref() }
     }
+
+    #[inline]
+    pub unsafe fn get_unchecked_mut(&self, index: usize) -> &mut T {
+        if index < N {
+            unsafe {
+                return (*self.root_chunk.values.get()).get_unchecked_mut(index).assume_init_mut();
+            };
+        }
+
+        let mut chunk = &self.root_chunk;
+        let mut len = chunk.len.load(Ordering::Acquire) as usize;
+        let mut chunk_idx = 0;
+        while len >= N && index >= (len + N * chunk_idx) {
+            let chunk_ptr = chunk.next.load(Ordering::Acquire);
+            chunk = unsafe { &*chunk_ptr };
+            chunk_idx += 1;
+            len = chunk.raw_len.load(Ordering::Acquire) as usize
+        }
+
+        unsafe { (*chunk.values.get()).get_unchecked_mut(index % N).assume_init_mut() }
+    }
 }
 
 impl<T, const N: usize> Drop for SyncVecChunk<T, N> {
@@ -154,12 +173,11 @@ impl<T, const N: usize> Drop for SyncVecChunk<T, N> {
 impl<T, const N: usize> SyncVecChunk<T, N> {
     const unsafe fn new() -> SyncVecChunk<T, N> {
         SyncVecChunk {
-            _non_zero: NonZeroU8::new_unchecked(1),
             next: AtomicPtr::new(std::ptr::null_mut()),
-            raw_len: AtomicU8::new(0),
+            raw_len: AtomicU16::new(0),
             entries_size: AtomicU32::new(0),
             // the amount of initiated items, this property increaed only after item fully initiated
-            len: AtomicU8::new(0),
+            len: AtomicU16::new(0),
             values: unsafe { MaybeUninit::zeroed().assume_init() },
         }
     }
@@ -278,14 +296,26 @@ impl<const N: usize> Iterator for ZipRangeIterator<N> {
             return None;
         }
 
-        let result = ZipRangeChunk {
-            first: self.first,
-            start: self.idx,
-            end: (self.idx + N).min(self.max_idx),
+        let result = if self.first {
+            let end = (self.idx + N).min(self.idx / 64 * 64 + N);
+            let result = ZipRangeChunk {
+                //
+                first: true,
+                start: self.idx,
+                end: end.min(self.max_idx),
+            };
+            self.idx = end;
+            self.first = false;
+            result
+        } else {
+            let result = ZipRangeChunk {
+                first: false,
+                start: self.idx,
+                end: (self.idx + N).min(self.max_idx),
+            };
+            self.idx = self.idx + N;
+            result
         };
-
-        self.idx += N;
-        self.first = false;
 
         Some(result)
     }
@@ -304,7 +334,7 @@ impl<const N: usize> ZipRangeChunk<N> {
 
     #[inline]
     pub fn complete(self) -> std::ops::Range<usize> {
-        self.start..self.end
+        (self.start % 64)..(self.end - self.start / 64 * 64)
     }
 
     #[inline]
@@ -325,7 +355,7 @@ impl<const N: usize> ZipRangeChunk<N> {
 fn iter() {
     let sync_vec1: SyncVec<_, 64> = SyncVec::new();
     let sync_vec2: SyncVec<_, 64> = SyncVec::new();
-    for i in 0..sync_vec1.chunk_size() {
+    for i in 0..(sync_vec1.chunk_size() * 3) {
         sync_vec1.push(i);
         sync_vec2.push(Box::new(i));
     }
@@ -338,15 +368,15 @@ fn iter() {
         }
     }
 
-    assert_eq!(&result_vec, &(0..sync_vec1.chunk_size()).collect::<Vec<usize>>());
+    assert_eq!(&result_vec, &(0..sync_vec1.chunk_size() * 3).collect::<Vec<usize>>());
 
-    let mut result_vec = Vec::new();
+    let mut result_vec: Vec<usize> = Vec::new();
 
     // #region ### multi-vec range iterator
     let mut range1_iter = ZipRangeIterator::new();
 
-    let chunk1_iter = &mut range1_iter.add(&sync_vec1, 20, sync_vec1.chunk_size());
-    let chunk2_iter = &mut range1_iter.add(&sync_vec2, 30, sync_vec2.chunk_size() + 10);
+    let chunk1_iter = &mut range1_iter.add(&sync_vec1, 20, sync_vec1.chunk_size() * 3);
+    let chunk2_iter = &mut range1_iter.add(&sync_vec2, 30, sync_vec2.chunk_size() * 3 + 10);
     for mut chunk in range1_iter {
         let chunk_1 = chunk.progress(chunk1_iter);
         let chunk_2 = chunk.progress(chunk2_iter);
@@ -355,9 +385,11 @@ fn iter() {
             result_vec.push(chunk_1[i] + *chunk_2[i]);
         }
     }
-    // #endregion
 
-    assert_eq!(&result_vec, &(30..sync_vec1.chunk_size()).map(|v| v + v).collect::<Vec<usize>>())
+    assert_eq!(
+        &result_vec,
+        &(30..sync_vec1.chunk_size() * 3).map(|v| v + v).collect::<Vec<usize>>()
+    )
 }
 
 #[test]

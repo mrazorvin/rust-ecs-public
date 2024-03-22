@@ -6,7 +6,17 @@ use std::{
 
 #[repr(transparent)]
 struct SyncSlot {
-    key: NonZeroU32,
+    index: NonZeroU32,
+}
+
+impl SyncSlot {
+    fn as_u32(&self) -> u32 {
+        self.index.get()
+    }
+
+    fn as_sync_vec_index(&self) -> usize {
+        (self.index.get() - 1) as usize
+    }
 }
 
 struct FreeKeysMeta {
@@ -14,11 +24,15 @@ struct FreeKeysMeta {
     load_iter: AtomicU32,
 }
 
+struct SlotMeta {
+    enabled: AtomicBool,
+}
+
 struct SyncSlotMap<T> {
     free_keys_store_idx: AtomicU32,
     free_keys_meta: [FreeKeysMeta; 2],
-    free_keys: [SyncVec<AtomicU32>; 2],
-    slots: SyncVec<T>,
+    free_keys: [SyncVec<AtomicU32, 512>; 2],
+    slots: SyncVec<(SlotMeta, T), 1024>,
 }
 
 fn get_keys_index(value: u32) -> usize {
@@ -38,17 +52,87 @@ impl<T> SyncSlotMap<T> {
         }
     }
 
-    pub fn push(&self) -> SyncSlot {
-        SyncSlot { key: todo!() }
+    pub fn push(&self, data: T) -> SyncSlot {
+        match self.get_free_key() {
+            Some(key) => {
+                let _ = std::mem::replace(
+                    unsafe { self.slots.get_unchecked_mut(key.as_sync_vec_index()) },
+                    (SlotMeta { enabled: AtomicBool::new(true) }, data),
+                );
+                key
+            }
+            None => SyncSlot {
+                index: unsafe {
+                    NonZeroU32::new_unchecked(
+                        self.slots.push((SlotMeta { enabled: AtomicBool::new(true) }, data)).1
+                            as u32,
+                    )
+                },
+            },
+        }
     }
 
-    pub fn get_key(&self) -> Option<u32> {
+    pub fn delete(&self, slot: SyncSlot) -> Option<&T> {
+        let data = unsafe { self.slots.get_unchecked(slot.as_sync_vec_index()) };
+        if data.0.enabled.load(Ordering::Acquire) {
+            data.0.enabled.store(false, Ordering::Release);
+            let (store_key, store_vec, store_meta) = self.get_store_vec();
+            let mut found = false;
+
+            if (store_meta.store_iter.load(Ordering::Acquire) as usize) < store_vec.size() {
+                let mut empty_slots = 0;
+                let mut iter = ZipRangeIterator::new();
+                let mut store_iter = &mut iter.add(
+                    &store_vec,
+                    store_meta.store_iter.load(Ordering::Acquire) as usize,
+                    u32::MAX as usize,
+                );
+
+                for mut chunk in iter {
+                    let vec = chunk.progress(&mut store_iter);
+                    for i in chunk.complete() {
+                        let free_key = vec[i].load(Ordering::Acquire);
+                        if free_key == 0 {
+                            if let Ok(_) = vec[i].compare_exchange(
+                                0,
+                                slot.index.get(),
+                                Ordering::AcqRel,
+                                Ordering::Relaxed,
+                            ) {
+                                found = true;
+                                break;
+                            } else {
+                                empty_slots += 1;
+                            }
+                        }
+                    }
+                }
+
+                if empty_slots > 0 && self.get_store_vec().0 == store_key {
+                    store_meta.store_iter.fetch_add(empty_slots, Ordering::Release);
+                }
+            }
+
+            if !found {
+                store_vec.push(AtomicU32::new(slot.index.get()));
+            }
+
+            store_meta.store_iter.fetch_add(1, Ordering::Release);
+
+            return Some(&data.1);
+        };
+
+        None
+    }
+
+    pub fn get_free_key(&self) -> Option<SyncSlot> {
         // the problem that we could change buffer not related to update
         // for example buffer was swapped by another thread
         // thats why we should, be carefully, oor least be sure that changing bad buffer won't cause a lot of problem
 
         // 1. increasing max by 1 for bad buffer, only take one additional slot, nothig more, so it's probably safe because we just skip one empty slot, even if it's alredy used, in worth keys we could lose single key because there we will interate only up to max
         // 2. increasing current for is worst because we have hihger chnace to skip keys, because we use this as for filtering
+
         'lookup_free_key: loop {
             let (load_key, load_vec, load_meta) = self.get_load_vec();
             let (store_key, _, store_meta) = self.get_store_vec();
@@ -82,24 +166,52 @@ impl<T> SyncSlotMap<T> {
                 }
             }
 
+            let mut found_free_key: u32 = 0;
+            let mut free_slots = 0;
             let mut iter = ZipRangeIterator::new();
             let mut load_iter = &mut iter.add(
                 &load_vec,
                 load_meta.load_iter.load(Ordering::Acquire) as usize,
-                u32::MAX as usize,
+                load_meta.store_iter.load(Ordering::Acquire) as usize,
             );
-            for mut chunk in iter {
+
+            'linear_lookup: for mut chunk in iter {
                 let vec = chunk.progress(&mut load_iter);
                 for i in chunk.complete() {
-                   if vec[i].load(Ordering::Acquire) == 0 {
-
-                   }
+                    let free_key = vec[i].load(Ordering::Acquire);
+                    if free_key != 0 {
+                        if let Err(_) = vec[i].compare_exchange(
+                            free_key,
+                            0,
+                            Ordering::AcqRel,
+                            Ordering::Relaxed,
+                        ) {
+                            free_slots += 1
+                        } else {
+                            found_free_key = free_key;
+                            break 'linear_lookup;
+                        }
+                    }
                 }
+            }
+
+            let still_same_load = load_key == self.get_load_vec().0;
+            if free_slots >= 1 && still_same_load {
+                load_meta.load_iter.fetch_add(free_slots, Ordering::Release);
+            }
+
+            if found_free_key != 0 {
+                load_meta.load_iter.fetch_add(1, Ordering::Release);
+                return Some(SyncSlot {
+                    index: unsafe { NonZeroU32::new_unchecked(found_free_key) },
+                });
+            } else if still_same_load {
+                return None;
             }
         }
     }
 
-    pub fn get_load_vec(&self) -> (u32, &SyncVec<AtomicU32>, &FreeKeysMeta) {
+    pub fn get_load_vec(&self) -> (u32, &SyncVec<AtomicU32, 512>, &FreeKeysMeta) {
         let cur_key = self.free_keys_store_idx.load(Ordering::Acquire);
         unsafe {
             (
@@ -110,7 +222,8 @@ impl<T> SyncSlotMap<T> {
         }
     }
 
-    pub fn get_store_vec(&self) -> (u32, &SyncVec<AtomicU32>, &FreeKeysMeta) {
+    #[inline]
+    pub fn get_store_vec(&self) -> (u32, &SyncVec<AtomicU32, 512>, &FreeKeysMeta) {
         let next_key = self.free_keys_store_idx.load(Ordering::Acquire) + 1;
         unsafe {
             (
@@ -120,4 +233,41 @@ impl<T> SyncSlotMap<T> {
             )
         }
     }
+}
+
+#[test]
+fn slot_map_basics() {
+    let slot_map: SyncSlotMap<u32> = SyncSlotMap::new();
+
+    let slot1 = slot_map.push(10);
+    assert_eq!(slot1.as_u32(), 1);
+    let slot2 = slot_map.push(20);
+    assert_eq!(slot2.as_u32(), 2);
+
+    assert_eq!(slot_map.slots.size(), 2);
+    assert_eq!(slot_map.delete(slot1), Some(&10));
+    assert_eq!(slot_map.delete(slot2), Some(&20));
+    assert_eq!(slot_map.delete(unsafe { std::mem::transmute(1) }), None);
+    assert_eq!(slot_map.delete(unsafe { std::mem::transmute(2) }), None);
+    assert_eq!(slot_map.delete(unsafe { std::mem::transmute(3) }), None);
+
+    let slot1 = slot_map.push(10);
+    assert_eq!(slot1.as_u32(), 1);
+    let slot2 = slot_map.push(20);
+    assert_eq!(slot2.as_u32(), 2);
+    let slot3 = slot_map.push(30);
+    assert_eq!(slot3.as_u32(), 3);
+
+    assert_eq!(slot_map.slots.size(), 3);
+    assert_eq!(slot_map.delete(slot1), Some(&10));
+    assert_eq!(slot_map.delete(slot2), Some(&20));
+
+    let slot1 = slot_map.push(40);
+    assert_eq!(slot_map.delete(slot1), Some(&40));
+    assert_eq!(slot_map.delete(slot3), Some(&30));
+
+    assert_eq!(slot_map.push(20).as_u32(), 2);
+    assert_eq!(slot_map.push(10).as_u32(), 1);
+    assert_eq!(slot_map.push(30).as_u32(), 3);
+    assert_eq!(slot_map.push(40).as_u32(), 4)
 }
