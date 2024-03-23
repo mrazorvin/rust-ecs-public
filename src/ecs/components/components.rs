@@ -4,6 +4,7 @@ use crate::ecs::{
         sync_sparse_chunked_store::{SyncSparseArrayChunk, SyncSparseChunkedStore},
         sync_vec::{SyncVec, ZipRangeIterator},
     },
+    ecs_mode,
     system::{self, Stage},
     world,
 };
@@ -99,10 +100,9 @@ pub trait ComponnetsResource: Sized + 'static {
     }
 
     fn fetch(
-        system: &mut system::State<world::State, system::stage_kind::Initilization>,
+        system: &mut system::State<world::State, ecs_mode::Exclusive>,
     ) -> Result<*mut Components<Self>, String> {
-        let components_ptr = unsafe { &*system.world() }
-            .resources
+        let components_ptr = unsafe { world::exclusive!(mut system.world() => resources) }
             .get(&TypeId::of::<Components<Self>>())
             .map(|(ptr, _)| unsafe { std::mem::transmute::<*mut u8, *mut Components<Self>>(*ptr) });
 

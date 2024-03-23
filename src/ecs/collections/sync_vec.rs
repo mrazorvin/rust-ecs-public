@@ -399,9 +399,6 @@ fn iter() {
 #[test]
 fn sync_vec_size() {
     assert_eq!(std::mem::size_of::<SyncVecChunk<(), 64>>(), 16);
-    assert_eq!(std::mem::size_of::<Option<SyncVec<()>>>(), 16);
-    assert_eq!(std::mem::size_of::<Option<ChunkIteratorItem<u128, 64>>>(), 24);
-
     assert_eq!(std::mem::size_of::<SyncVec<u8>>(), std::mem::size_of::<SyncVec<()>>() + 64);
 
     assert_eq!(

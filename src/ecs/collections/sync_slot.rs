@@ -250,7 +250,17 @@ fn slot_map_async() {
     //
     // 2. Delete inserted items from 2 threads
     //    - All deleted items must be stored in current keys_store
-    //    - Syncronization for this part is provided & tested by sync_vec
+    //    - Syncronization for this part is also provided & tested by sync_vec
+    //
+    // 3. Insert following 100 items with 100 threads
+    //    - we need to switch current store_vec
+    //      with load_vec, and use already existed keys
+    //      in result we should re-use all previous deleted keys
+    //
+    // 4. Delete 50 random keys & Insert 50 new radonm keys
+    //    This test continiously delete & insert items at the same time
+    //    as result we should contains some delete keys and some new keys
+    //    that was created because we run-out of existed keys
     //
 
     static slot_map: SyncSlotMap<u32> = SyncSlotMap::new();

@@ -13,8 +13,19 @@ pub mod tests;
 pub mod view;
 pub mod world;
 
+pub mod ecs_mode {
+    pub enum Unknown {}
+
+    // ecs executed only from main i.e access to shared resource is safe
+    pub enum Exclusive {}
+
+    // ecs execute more than one system i.e access to shared data must be thread safe
+    pub enum Shared {}
+}
+
 pub mod prelude {
     pub use super::components::Components;
+    pub use super::ecs_mode;
     pub use super::entity;
     pub use super::frame_dispose;
     pub use super::query::*;

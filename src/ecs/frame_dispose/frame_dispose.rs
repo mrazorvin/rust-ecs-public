@@ -7,7 +7,9 @@ use crate::ecs::{
 pub fn disposer(world: &mut World) {
     for chunk in CHANGED_COMPONENTS.chunks() {
         for i in 0..chunk.len() {
-            if let Some((_, ref mut resource)) = world.resources.get_mut(&chunk[i]) {
+            if let Some((_, ref mut resource)) =
+                world::exclusive!(world->resources).get_mut(&chunk[i])
+            {
                 resource.dispose_frame();
             }
         }

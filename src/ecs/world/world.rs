@@ -3,12 +3,16 @@ use hashlink::LinkedHashMap;
 use nohash_hasher::NoHashHasher;
 use std::{
     any::{self, Any, TypeId},
+    cell::UnsafeCell,
     collections::HashMap,
     hash::{BuildHasherDefault, Hash},
     ops::{Deref, DerefMut},
 };
 
-use crate::ecs::system::{self, Stage, SystemResult, OK};
+use crate::ecs::{
+    ecs_mode,
+    system::{self, Stage, SystemResult, OK},
+};
 
 pub type System = system::State<State>;
 
@@ -98,6 +102,23 @@ pub struct SchedulerStages {
     teardown: SchedulerStage,
 }
 
+// instead of manually calling exclusive we must pass exclusive world to place where its' belongs
+
+macro_rules! exclusive {
+    ($world: ident -> $field: ident) => {
+        $world.exclusive.get_mut().$field
+    };
+    (mut $world:expr) => {
+        (&mut (*(*$world).exclusive.get()))
+    };
+    (mut $world:expr => $field: ident) => {
+        (&mut (*(*$world).exclusive.get()).$field)
+    };
+}
+
+#[allow(unused)]
+pub(crate) use exclusive;
+
 impl SchedulerStages {
     pub fn new() -> Self {
         Self {
@@ -136,7 +157,7 @@ impl Scheduler {
         // SAFETY: at any point of time should exist only single reference to world
         //         in this cases lifetime is ended after end of the function
         //         so if outher functions doens't has mut refrence to world it's safe to call
-        let State { ref mut scheduler, .. } = unsafe { &mut *world };
+        let scheduler = unsafe { exclusive!(mut world => scheduler) };
 
         match schedule {
             Schedule::Startup => todo!(),
@@ -150,7 +171,10 @@ impl Scheduler {
     }
 }
 
-pub struct State {
+pub struct Shared {}
+
+// parts of world which could be modified only in single thread mode
+pub struct Exclusive {
     pub systems: HashMap<
         // usize is just a pointer to memory, it could be pointer to a state if system spawned with state or directly to function pointer if there no state
         usize,
@@ -167,13 +191,21 @@ pub struct State {
     pub resources_bump: bumpalo::Bump,
 }
 
+pub struct State {
+    pub exclusive: UnsafeCell<Exclusive>,
+    pub shared: Shared,
+}
+
 impl Default for State {
     fn default() -> Self {
         Self {
-            resources: Default::default(),
-            resources_bump: Default::default(),
-            scheduler: Scheduler { stages: SchedulerStages::new() },
-            systems: Default::default(),
+            exclusive: UnsafeCell::new(Exclusive {
+                resources: Default::default(),
+                resources_bump: Default::default(),
+                scheduler: Scheduler { stages: SchedulerStages::new() },
+                systems: Default::default(),
+            }),
+            shared: Shared {},
         }
     }
 }
@@ -188,8 +220,7 @@ impl State {
         // SAFETY: at any point of time should exist only single reference to world
         //         in this cases lifetime of &mut world is ended after assigment
         //         so if outher functions doens't has mut refrence to world it's safe to call
-        let state = unsafe { &mut *world }
-            .systems
+        let state = unsafe { exclusive!(mut world => systems) }
             .entry(system_fn as usize)
             .or_insert_with(|| system::State::new(world, state));
 
@@ -216,17 +247,16 @@ impl State {
     }
 
     pub fn set_resource<T: Resource>(&mut self, data: T) -> (*mut T, Option<T>) {
-        let existed_resource = self
-            .resources
+        let existed_resource = exclusive!(self -> resources)
             .get(&TypeId::of::<T>())
             .map(|(ptr, _)| unsafe { std::mem::transmute::<*mut u8, *mut T>(*ptr) });
 
         match existed_resource {
             Some(existed_ptr) => (existed_ptr, Some(unsafe { existed_ptr.replace(data) })),
             None => {
-                let ptr = BumpBox::into_raw(BumpBox::new_in(data, &self.resources_bump));
-                let insertion_result = self
-                    .resources
+                let ptr =
+                    BumpBox::into_raw(BumpBox::new_in(data, &exclusive!(self -> resources_bump)));
+                let insertion_result = exclusive!(self -> resources)
                     .insert(TypeId::of::<T>(), (ptr as *mut u8, unsafe { BumpBox::from_raw(ptr) }));
                 match insertion_result {
                     Some(_) => panic!("State.set_resource# something went wrong, type {} can't exists in world at this point, probably you call State.set_resource in multiple threads", any::type_name::<T>()),
@@ -299,10 +329,9 @@ pub trait UniqueResource: 'static + Sized {
     }
 
     fn fetch(
-        system: &mut system::State<State, system::stage_kind::Initilization>,
+        system: &mut system::State<State, ecs_mode::Exclusive>,
     ) -> Result<*mut Unique<Self>, String> {
-        let components_ptr = unsafe { &*system.world() }
-            .resources
+        let components_ptr = unsafe { exclusive!(mut system.world() => resources) }
             .get(&TypeId::of::<Unique<Self>>())
             .map(|(ptr, _)| unsafe { std::mem::transmute::<*mut u8, *mut Unique<Self>>(*ptr) });
 
@@ -324,7 +353,7 @@ pub trait UniqueResource: 'static + Sized {
     }
 }
 
-impl system::State<super::State, system::stage_kind::Initilization> {
+impl system::State<super::State, ecs_mode::Exclusive> {
     pub fn add_system(&mut self, system_fn: system::Func<State>, schedule: Schedule) {
         State::schedule_system(self.world(), system_fn, None, schedule);
     }
@@ -356,11 +385,11 @@ impl World {
     }
 
     pub fn execute(&mut self) {
-        // #region ### World -> Executre -> System call
-        for system_id in 0..self.scheduler.stages.update.items.len() {
-            let system_fn = self.scheduler.stages.update.items[system_id].func;
-            let key = self.scheduler.stages.update.items[system_id].func as usize;
-            let system = self.systems.get_mut(&key).unwrap();
+        // #region### World -> Executre -> System call
+        for system_id in 0..exclusive!(self -> scheduler).stages.update.items.len() {
+            let system_fn = exclusive!(self -> scheduler).stages.update.items[system_id].func;
+            let key = exclusive!(self -> scheduler).stages.update.items[system_id].func as usize;
+            let system = exclusive!(self -> systems).get_mut(&key).unwrap();
             system.set_stage(Stage::Execution);
             match system_fn(system) {
                 Err(error) => panic!("System {}() failed with error# `{}`", system.name(), error),
@@ -376,8 +405,8 @@ impl World {
             }
             system.set_stage(Stage::Initialization);
         }
-        // #endregion
-        self.scheduler.reset();
+
+        exclusive!(self -> scheduler).reset();
     }
 }
 

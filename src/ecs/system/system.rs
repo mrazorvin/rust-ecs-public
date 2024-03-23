@@ -7,14 +7,8 @@ pub enum Stage {
     Execution,
 }
 
-pub mod stage_kind {
-    pub enum Unknown {}
-    pub enum Initilization {}
-    pub enum Execution {}
-}
-
 #[derive(Debug)]
-pub struct State<World, StageKind = stage_kind::Unknown> {
+pub struct State<World, StageKind = ecs_mode::Unknown> {
     stage: Stage,
     name: &'static str,
     world: *mut World,
@@ -46,7 +40,7 @@ impl<World> State<World> {
     }
 }
 
-impl<World> State<World, stage_kind::Initilization> {
+impl<World> State<World, ecs_mode::Exclusive> {
     pub fn world(&self) -> *mut World {
         self.world
     }
@@ -104,7 +98,7 @@ macro_rules! define {
       $system.set_stage(crate::ecs::system::Stage::Initialization);
     }
 
-    let $system = crate::ecs::system::as_sys::<crate::ecs::system::stage_kind::Initilization, _, _>($system);
+    let $system = crate::ecs::system::as_sys::<crate::ecs::ecs_mode::Exclusive, _, _>($system);
 
     $(#[allow(unused_mut, non_snake_case)] let mut $type: View<_, $dep_type> = unsafe { View::new($type::fetch($system)?) };)*
 
@@ -130,7 +124,7 @@ macro_rules! define {
     }
 
     #[allow(unused_variables)]
-    let $system = crate::ecs::system::as_sys::<crate::ecs::system::stage_kind::Execution, _, _>($system);
+    let $system = crate::ecs::system::as_sys::<crate::ecs::ecs_mode::Exclusive, _, _>($system);
   };
 
   (@sys_name $var:ident, $prefix_len:expr) => {
@@ -164,7 +158,7 @@ pub fn system_macro_test() {
 
     // #region ### Test - Unit example component
     impl Unit {
-        fn fetch(_: &mut State<(), stage_kind::Initilization>) -> Result<Unit, &str> {
+        fn fetch(_: &mut State<(), ecs_mode::Exclusive>) -> Result<Unit, &str> {
             Ok(Unit { value: 0 })
         }
     }
@@ -181,7 +175,7 @@ pub fn system_macro_test() {
     }
 
     impl Position {
-        fn fetch(_: &mut State<(), stage_kind::Initilization>) -> Result<Position, &str> {
+        fn fetch(_: &mut State<(), ecs_mode::Exclusive>) -> Result<Position, &str> {
             Ok(Position { value: 10 })
         }
     }
@@ -222,3 +216,5 @@ use std::marker::PhantomData;
 
 #[allow(unused)]
 pub(crate) use define;
+
+use crate::ecs::ecs_mode;
