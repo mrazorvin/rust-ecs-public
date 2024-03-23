@@ -9,7 +9,10 @@ use glium::Surface;
 
 use crate::{
     client::glium_dsl::app_window_sdl::AppWindow,
-    ecs::world::{self, World},
+    ecs::{
+        ecs_mode,
+        world::{self, World},
+    },
 };
 
 use super::{
@@ -18,9 +21,9 @@ use super::{
 };
 
 pub fn render_loop(
-    mut world: crate::ecs::world::World,
-    cb: &dyn Fn(&mut World) -> (),
-    cb_frame_end: &dyn Fn(&mut World) -> (),
+    mut world: crate::ecs::world::World<ecs_mode::Exclusive>,
+    cb: &dyn Fn(&mut World<ecs_mode::Exclusive>) -> (),
+    cb_frame_end: &dyn Fn(&mut World<ecs_mode::Exclusive>) -> (),
 ) -> Result<(), Box<dyn std::error::Error>> {
     let app = AppWindow::new("Game", 1920.0, 1080.0);
 

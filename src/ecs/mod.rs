@@ -19,7 +19,7 @@ pub mod ecs_mode {
     // ecs executed only from main i.e access to shared resource is safe
     pub enum Exclusive {}
 
-    // ecs execute more than one system i.e access to shared data must be thread safe
+    // ecs could execute more than one system i.e access to exclusive data could be ony read only
     pub enum Shared {}
 }
 

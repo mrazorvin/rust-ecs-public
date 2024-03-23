@@ -1,6 +1,8 @@
 use crate::ecs::prelude::*;
 
-pub fn create_game(world: &mut crate::ecs::world::World) -> Result<(), Box<dyn std::error::Error>> {
+pub fn create_game(
+    world: &mut crate::ecs::world::World<ecs_mode::Exclusive>,
+) -> Result<(), Box<dyn std::error::Error>> {
     println!("----- Cycle -----");
 
     world.add_system(init, Schedule::Update);
@@ -9,7 +11,7 @@ pub fn create_game(world: &mut crate::ecs::world::World) -> Result<(), Box<dyn s
     Ok(())
 }
 
-pub fn init(sys: &mut world::System) -> system::Return {
+pub fn init(sys: &mut system::State) -> system::Return {
     system::define!(sys, {
         println!("ARPG(init): Initialization");
         sys.add_system(sys1, Schedule::Update);
@@ -21,7 +23,7 @@ pub fn init(sys: &mut world::System) -> system::Return {
     system::OK
 }
 
-pub fn setup(sys: &mut world::System) -> system::Return {
+pub fn setup(sys: &mut system::State) -> system::Return {
     system::define!(sys, {});
 
     println!("ARPG(setup): Execution");
@@ -29,7 +31,7 @@ pub fn setup(sys: &mut world::System) -> system::Return {
     system::OK
 }
 
-pub fn sys1(sys: &mut world::System) -> system::Return {
+pub fn sys1(sys: &mut system::State) -> system::Return {
     system::define!(sys);
 
     println!("ARPG(sys1): Execution");
@@ -37,7 +39,7 @@ pub fn sys1(sys: &mut world::System) -> system::Return {
     system::OK
 }
 
-pub fn sys2(sys: &mut world::System) -> system::Return {
+pub fn sys2(sys: &mut system::State) -> system::Return {
     system::define!(sys);
 
     println!("ARPG(sys2): Execution");

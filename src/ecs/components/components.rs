@@ -5,7 +5,7 @@ use crate::ecs::{
         sync_vec::{SyncVec, ZipRangeIterator},
     },
     ecs_mode,
-    system::{self, Stage},
+    system::{self, sys_mode, Stage},
     world,
 };
 use core::arch;
@@ -100,9 +100,10 @@ pub trait ComponnetsResource: Sized + 'static {
     }
 
     fn fetch(
-        system: &mut system::State<world::State, ecs_mode::Exclusive>,
+        system: &mut system::State<ecs_mode::Exclusive, sys_mode::Configuration>,
     ) -> Result<*mut Components<Self>, String> {
-        let components_ptr = unsafe { world::exclusive!(mut system.world() => resources) }
+        let components_ptr = unsafe { system.world() }
+            .resources
             .get(&TypeId::of::<Components<Self>>())
             .map(|(ptr, _)| unsafe { std::mem::transmute::<*mut u8, *mut Components<Self>>(*ptr) });
 
@@ -115,7 +116,7 @@ pub trait ComponnetsResource: Sized + 'static {
                 Some(ptr) => Ok(ptr),
                 None => {
                     let comps: Components<Self> = Components::default();
-                    unsafe { &mut *system.world() }.add_resource(comps)
+                    unsafe { system.world() }.add_resource(comps)
                 }
             },
             Stage::Execution => components_ptr

@@ -1,6 +1,6 @@
 use crate::ecs::prelude::*;
 
-pub fn integration_tests() -> Vec<system::Func<world::State>> {
+pub fn integration_tests() -> Vec<system::SysFn> {
     Vec::new()
 }
 

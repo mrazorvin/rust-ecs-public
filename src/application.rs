@@ -12,7 +12,7 @@ pub fn start_app() {
 
     let module_id = Cell::new(0);
     let test_id = Cell::new(0);
-    let test_executor = |world: &mut world::World| {
+    let test_executor = |world: &mut world::World<ecs_mode::Exclusive>| {
         let module = tests.get(module_id.get());
         if let Some((_, tests)) = module {
             if let Some(test_func) = tests.get(test_id.get()) {
@@ -33,8 +33,8 @@ pub fn start_app() {
     crate::client::render_loop(world, &test_executor, &frame_dispose::disposer).unwrap()
 }
 
-fn test_executor(sys: &mut world::System) -> system::Return {
-    let func = sys.state(&|| -> system::Func<world::State> { test_placeholder_func })?;
+fn test_executor(sys: &mut system::State) -> system::Return {
+    let func = sys.state(&|| -> system::SysFn { test_placeholder_func })?;
     let now = Instant::now();
     let result = func(sys);
     let elapsed = now.elapsed().as_micros();
@@ -46,6 +46,6 @@ fn test_executor(sys: &mut world::System) -> system::Return {
     result
 }
 
-fn test_placeholder_func(_: &mut world::System) -> system::Return {
+fn test_placeholder_func(_: &mut system::State) -> system::Return {
     panic!("test call placeholder instead of real function");
 }

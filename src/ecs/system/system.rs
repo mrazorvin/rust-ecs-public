@@ -1,4 +1,9 @@
-// TODO part of system
+use crate::ecs::{
+    ecs_mode,
+    world::{self, World},
+};
+use std::marker::PhantomData;
+
 #[non_exhaustive]
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Stage {
@@ -7,23 +12,28 @@ pub enum Stage {
     Execution,
 }
 
-#[derive(Debug)]
-pub struct State<World, StageKind = ecs_mode::Unknown> {
-    stage: Stage,
-    name: &'static str,
-    world: *mut World,
-    state: Option<Box<dyn std::any::Any>>,
-    stage_kind: PhantomData<StageKind>,
+pub mod sys_mode {
+    pub enum Undefined {}
+    pub enum Configuration {}
+    pub enum Execution {}
 }
 
-pub fn as_sys<OutStageKind, World, InStageKind>(
-    system: &mut State<World, InStageKind>,
-) -> &mut State<World, OutStageKind> {
+pub struct State<EcsMode = ecs_mode::Unknown, SystemMode = sys_mode::Undefined> {
+    stage: Stage,
+    name: &'static str,
+    world: *mut world::State<EcsMode>,
+    state: Option<Box<dyn std::any::Any>>,
+    sys_mod: PhantomData<SystemMode>,
+}
+
+pub fn as_sys<OutEcsMode, OutSysMode, InEcsMode, InSysMode>(
+    system: &mut State<InEcsMode, InSysMode>,
+) -> &mut State<OutEcsMode, OutSysMode> {
     unsafe { std::mem::transmute(system) }
 }
 
-impl<World> State<World> {
-    pub fn set_world(&mut self, world: *mut World) {
+impl<T> State<T, sys_mode::Undefined> {
+    pub fn set_world(&mut self, world: *mut world::State<T>) {
         self.world = world;
     }
 
@@ -40,18 +50,24 @@ impl<World> State<World> {
     }
 }
 
-impl<World> State<World, ecs_mode::Exclusive> {
-    pub fn world(&self) -> *mut World {
+impl State<ecs_mode::Exclusive, sys_mode::Configuration> {
+    // it overall safe to create reference to world because of exclusive access
+    // just don't forget about aliasing
+    pub unsafe fn world(&self) -> &mut world::State<ecs_mode::Exclusive> {
+        unsafe { &mut *self.world }
+    }
+
+    pub fn world_ptr(&self) -> *mut world::State<ecs_mode::Exclusive> {
         self.world
     }
 }
 
-impl<World, StageKind> State<World, StageKind> {
-    pub fn new(world: *mut World, state: Option<Box<dyn std::any::Any>>) -> Self {
+impl<EcsMod, SysMod> State<EcsMod, SysMod> {
+    pub fn new(world: *mut world::State<EcsMod>, state: Option<Box<dyn std::any::Any>>) -> Self {
         Self {
             stage: Stage::Instantination,
             name: Default::default(),
-            stage_kind: PhantomData {},
+            sys_mod: PhantomData {},
             world,
             state,
         }
@@ -98,7 +114,11 @@ macro_rules! define {
       $system.set_stage(crate::ecs::system::Stage::Initialization);
     }
 
-    let $system = crate::ecs::system::as_sys::<crate::ecs::ecs_mode::Exclusive, _, _>($system);
+    let $system = crate::ecs::system::as_sys::<
+        crate::ecs::ecs_mode::Exclusive,
+        crate::ecs::system::sys_mode::Configuration,
+        _, _
+    >($system);
 
     $(#[allow(unused_mut, non_snake_case)] let mut $type: View<_, $dep_type> = unsafe { View::new($type::fetch($system)?) };)*
 
@@ -124,7 +144,10 @@ macro_rules! define {
     }
 
     #[allow(unused_variables)]
-    let $system = crate::ecs::system::as_sys::<crate::ecs::ecs_mode::Exclusive, _, _>($system);
+    let $system = crate::ecs::system::as_sys::<
+        crate::ecs::ecs_mode::Exclusive,
+        crate::ecs::system::sys_mode::Execution,
+    _, _>($system);
   };
 
   (@sys_name $var:ident, $prefix_len:expr) => {
@@ -140,7 +163,7 @@ pub enum SystemResult {
     Stop,
 }
 
-pub type Func<World> = fn(&mut State<World>) -> Return;
+pub type SysFn = fn(&mut State<ecs_mode::Unknown, sys_mode::Undefined>) -> Return;
 pub type Return = std::result::Result<SystemResult, Box<dyn std::error::Error>>;
 pub const OK: std::result::Result<SystemResult, Box<dyn std::error::Error>> =
     Ok(SystemResult::Completed);
@@ -158,7 +181,9 @@ pub fn system_macro_test() {
 
     // #region ### Test - Unit example component
     impl Unit {
-        fn fetch(_: &mut State<(), ecs_mode::Exclusive>) -> Result<Unit, &str> {
+        fn fetch(
+            _: &mut State<ecs_mode::Exclusive, sys_mode::Configuration>,
+        ) -> Result<Unit, &str> {
             Ok(Unit { value: 0 })
         }
     }
@@ -175,7 +200,9 @@ pub fn system_macro_test() {
     }
 
     impl Position {
-        fn fetch(_: &mut State<(), ecs_mode::Exclusive>) -> Result<Position, &str> {
+        fn fetch(
+            _: &mut State<ecs_mode::Exclusive, sys_mode::Configuration>,
+        ) -> Result<Position, &str> {
             Ok(Position { value: 10 })
         }
     }
@@ -196,7 +223,7 @@ pub fn system_macro_test() {
     struct read {}
     struct write {}
 
-    fn system_features_fn(sys: &mut State<()>) -> Return {
+    fn system_features_fn(sys: &mut State) -> Return {
         define!(sys, read![Position], write![Unit]);
 
         assert_eq!(Position.value.value, 0);
@@ -212,9 +239,5 @@ pub fn system_macro_test() {
     }
 }
 
-use std::marker::PhantomData;
-
 #[allow(unused)]
 pub(crate) use define;
-
-use crate::ecs::ecs_mode;

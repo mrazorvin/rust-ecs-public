@@ -29,7 +29,7 @@ fn world_test() {
     world.execute();
 }
 
-fn simple_system(sys: &mut world::System) -> system::Return {
+fn simple_system(sys: &mut system::State) -> system::Return {
     system::define!(sys, write![Position], write![Input]);
 
     Position.set(10, 10, Position {});

@@ -6,15 +6,14 @@ use std::{
     cell::UnsafeCell,
     collections::HashMap,
     hash::{BuildHasherDefault, Hash},
+    marker::PhantomData,
     ops::{Deref, DerefMut},
 };
 
 use crate::ecs::{
     ecs_mode,
-    system::{self, Stage, SystemResult, OK},
+    system::{self, sys_mode, Stage, SystemResult, OK},
 };
-
-pub type System = system::State<State>;
 
 //  Basic implementation without priority consist of folowing steps:
 //  - Single vec for stage 1 & stage 2
@@ -73,7 +72,7 @@ pub type System = system::State<State>;
 
 // we can't use allocations for this struc, otherwise change `set_len` to `clear` in
 pub struct ScheduleItem {
-    func: system::Func<State>,
+    func: system::SysFn,
 }
 #[derive(Debug, Clone, PartialEq)]
 pub enum Schedule {
@@ -89,7 +88,7 @@ pub struct SchedulerStage {
 }
 
 impl SchedulerStage {
-    pub fn add_system(&mut self, func: system::Func<State>) {
+    pub fn add_system(&mut self, func: system::SysFn) {
         self.items.push(ScheduleItem { func })
     }
 }
@@ -104,21 +103,6 @@ pub struct SchedulerStages {
 
 // instead of manually calling exclusive we must pass exclusive world to place where its' belongs
 
-macro_rules! exclusive {
-    ($world: ident -> $field: ident) => {
-        $world.exclusive.get_mut().$field
-    };
-    (mut $world:expr) => {
-        (&mut (*(*$world).exclusive.get()))
-    };
-    (mut $world:expr => $field: ident) => {
-        (&mut (*(*$world).exclusive.get()).$field)
-    };
-}
-
-#[allow(unused)]
-pub(crate) use exclusive;
-
 impl SchedulerStages {
     pub fn new() -> Self {
         Self {
@@ -130,7 +114,7 @@ impl SchedulerStages {
         }
     }
 
-    pub fn schedule_system(_world: *mut World, _system: system::Func<State>) {}
+    pub fn schedule_system(_world: *mut World<ecs_mode::Exclusive>, _system: system::SysFn) {}
 
     pub fn reset(&mut self) {
         // SAFETY: we don't need to drop function pointers, and 0 is always less than vec capacity
@@ -153,11 +137,15 @@ impl Scheduler {
         self.stages.reset();
     }
 
-    fn schedule_system(world: *mut State, system_fn: system::Func<State>, schedule: Schedule) {
+    fn schedule_system(
+        world: *mut State<ecs_mode::Exclusive>,
+        system_fn: system::SysFn,
+        schedule: Schedule,
+    ) {
         // SAFETY: at any point of time should exist only single reference to world
         //         in this cases lifetime is ended after end of the function
         //         so if outher functions doens't has mut refrence to world it's safe to call
-        let scheduler = unsafe { exclusive!(mut world => scheduler) };
+        let scheduler = unsafe { &mut (*world).scheduler };
 
         match schedule {
             Schedule::Startup => todo!(),
@@ -178,7 +166,7 @@ pub struct Exclusive {
     pub systems: HashMap<
         // usize is just a pointer to memory, it could be pointer to a state if system spawned with state or directly to function pointer if there no state
         usize,
-        system::State<State>,
+        system::State,
         BuildHasherDefault<NoHashHasher<u64>>,
     >,
     pub scheduler: Scheduler,
@@ -191,12 +179,13 @@ pub struct Exclusive {
     pub resources_bump: bumpalo::Bump,
 }
 
-pub struct State {
+pub struct State<EcsMode> {
     pub exclusive: UnsafeCell<Exclusive>,
     pub shared: Shared,
+    _marker: PhantomData<EcsMode>,
 }
 
-impl Default for State {
+impl Default for State<ecs_mode::Exclusive> {
     fn default() -> Self {
         Self {
             exclusive: UnsafeCell::new(Exclusive {
@@ -206,23 +195,38 @@ impl Default for State {
                 systems: Default::default(),
             }),
             shared: Shared {},
+            _marker: PhantomData {},
         }
     }
 }
 
-impl State {
+impl Deref for State<ecs_mode::Exclusive> {
+    type Target = Exclusive;
+
+    fn deref(&self) -> &Self::Target {
+        unsafe { &*self.exclusive.get() }
+    }
+}
+
+impl DerefMut for State<ecs_mode::Exclusive> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.exclusive.get_mut()
+    }
+}
+
+impl State<ecs_mode::Exclusive> {
     fn schedule_system(
-        world: *mut State,
-        system_fn: system::Func<State>,
+        world: *mut State<ecs_mode::Exclusive>,
+        system_fn: system::SysFn,
         state: Option<Box<dyn Any>>,
         schedule: Schedule,
     ) {
         // SAFETY: at any point of time should exist only single reference to world
         //         in this cases lifetime of &mut world is ended after assigment
         //         so if outher functions doens't has mut refrence to world it's safe to call
-        let state = unsafe { exclusive!(mut world => systems) }
+        let state = unsafe { &mut (*world).systems }
             .entry(system_fn as usize)
-            .or_insert_with(|| system::State::new(world, state));
+            .or_insert_with(|| system::State::new(unsafe { std::mem::transmute(world) }, state));
 
         match system_fn(state) {
             Err(error) => panic!(
@@ -247,16 +251,17 @@ impl State {
     }
 
     pub fn set_resource<T: Resource>(&mut self, data: T) -> (*mut T, Option<T>) {
-        let existed_resource = exclusive!(self -> resources)
+        let existed_resource = self
+            .resources
             .get(&TypeId::of::<T>())
             .map(|(ptr, _)| unsafe { std::mem::transmute::<*mut u8, *mut T>(*ptr) });
 
         match existed_resource {
             Some(existed_ptr) => (existed_ptr, Some(unsafe { existed_ptr.replace(data) })),
             None => {
-                let ptr =
-                    BumpBox::into_raw(BumpBox::new_in(data, &exclusive!(self -> resources_bump)));
-                let insertion_result = exclusive!(self -> resources)
+                let ptr = BumpBox::into_raw(BumpBox::new_in(data, &self.resources_bump));
+                let insertion_result = self
+                    .resources
                     .insert(TypeId::of::<T>(), (ptr as *mut u8, unsafe { BumpBox::from_raw(ptr) }));
                 match insertion_result {
                     Some(_) => panic!("State.set_resource# something went wrong, type {} can't exists in world at this point, probably you call State.set_resource in multiple threads", any::type_name::<T>()),
@@ -329,9 +334,10 @@ pub trait UniqueResource: 'static + Sized {
     }
 
     fn fetch(
-        system: &mut system::State<State, ecs_mode::Exclusive>,
+        system: &mut system::State<ecs_mode::Exclusive, sys_mode::Configuration>,
     ) -> Result<*mut Unique<Self>, String> {
-        let components_ptr = unsafe { exclusive!(mut system.world() => resources) }
+        let components_ptr = unsafe { system.world() }
+            .resources
             .get(&TypeId::of::<Unique<Self>>())
             .map(|(ptr, _)| unsafe { std::mem::transmute::<*mut u8, *mut Unique<Self>>(*ptr) });
 
@@ -353,43 +359,43 @@ pub trait UniqueResource: 'static + Sized {
     }
 }
 
-impl system::State<super::State, ecs_mode::Exclusive> {
-    pub fn add_system(&mut self, system_fn: system::Func<State>, schedule: Schedule) {
-        State::schedule_system(self.world(), system_fn, None, schedule);
+impl system::State<ecs_mode::Exclusive, sys_mode::Configuration> {
+    pub fn add_system(&mut self, system_fn: system::SysFn, schedule: Schedule) {
+        State::schedule_system(self.world_ptr(), system_fn, None, schedule);
     }
 }
 
-pub struct World {
-    pub state: *mut State,
+pub struct World<EcsMode> {
+    pub state: *mut State<EcsMode>,
 }
 
-impl !Send for World {}
-impl !Sync for World {}
+impl !Send for World<ecs_mode::Exclusive> {}
+impl !Sync for World<ecs_mode::Exclusive> {}
 
-impl World {
-    pub fn new() -> World {
+impl World<ecs_mode::Exclusive> {
+    pub fn new() -> World<ecs_mode::Exclusive> {
         World { state: Box::into_raw(Box::new(super::State::default())) }
     }
 
     pub fn add_system_with_state(
         &mut self,
-        system_fn: system::Func<State>,
+        system_fn: system::SysFn,
         system_state: Option<Box<dyn Any>>,
         schedule: Schedule,
     ) {
         State::schedule_system(self.state, system_fn, system_state, schedule);
     }
 
-    pub fn add_system(&mut self, system_fn: system::Func<State>, schedule: Schedule) {
+    pub fn add_system(&mut self, system_fn: system::SysFn, schedule: Schedule) {
         self.add_system_with_state(system_fn, None, schedule);
     }
 
     pub fn execute(&mut self) {
         // #region### World -> Executre -> System call
-        for system_id in 0..exclusive!(self -> scheduler).stages.update.items.len() {
-            let system_fn = exclusive!(self -> scheduler).stages.update.items[system_id].func;
-            let key = exclusive!(self -> scheduler).stages.update.items[system_id].func as usize;
-            let system = exclusive!(self -> systems).get_mut(&key).unwrap();
+        for system_id in 0..self.scheduler.stages.update.items.len() {
+            let system_fn = self.scheduler.stages.update.items[system_id].func;
+            let key = self.scheduler.stages.update.items[system_id].func as usize;
+            let system = self.systems.get_mut(&key).unwrap();
             system.set_stage(Stage::Execution);
             match system_fn(system) {
                 Err(error) => panic!("System {}() failed with error# `{}`", system.name(), error),
@@ -406,31 +412,29 @@ impl World {
             system.set_stage(Stage::Initialization);
         }
 
-        exclusive!(self -> scheduler).reset();
+        self.scheduler.reset();
     }
 }
 
-// #region ### World -> Deref & DerefMut
-impl Deref for World {
-    type Target = State;
+impl Deref for World<ecs_mode::Exclusive> {
+    type Target = State<ecs_mode::Exclusive>;
 
     fn deref(&self) -> &Self::Target {
         unsafe { &*self.state }
     }
 }
 
-impl DerefMut for World {
+impl DerefMut for World<ecs_mode::Exclusive> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         unsafe { &mut *self.state }
     }
 }
 
-impl Drop for World {
+impl<T> Drop for World<T> {
     fn drop(&mut self) {
         drop(unsafe { Box::from_raw(self.state) });
     }
 }
-// #endregion
 
 #[test]
 fn test_insetion_order_map() {

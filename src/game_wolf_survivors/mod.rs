@@ -67,7 +67,7 @@ struct Audio {
     ctx: AudioContext,
 }
 
-fn schedule(sys: &mut world::System) -> system::Return {
+fn schedule(sys: &mut system::State) -> system::Return {
     system::define!(sys, read![Sprite], {
         if Sprite.len() == 0 {
             sys.add_system(init, Schedule::Update);
@@ -85,7 +85,7 @@ fn schedule(sys: &mut world::System) -> system::Return {
     system::OK
 }
 
-fn init(_sys: &mut world::System) -> system::Return {
+fn init(_sys: &mut system::State) -> system::Return {
     system::define!(_sys, write![OpenGL], write![Sprite], write![Assets], read![Audio]);
 
     Assets.load_tilemap("forest_map", &mut OpenGL)?;
@@ -123,7 +123,7 @@ fn init(_sys: &mut world::System) -> system::Return {
     return system::OK;
 }
 
-fn increase_time(sys: &mut world::System) -> system::Return {
+fn increase_time(sys: &mut system::State) -> system::Return {
     system::define!(sys, write![Assets], write![Loop]);
     Assets.pipeline.as_mut().map(|pipeline| pipeline.time += Loop.time as u32 / 100);
 
@@ -140,7 +140,7 @@ fn to_cartesian(pos: Vec2, origin: Vec2) -> Vec2 {
     };
 }
 
-fn set_buffers(sys: &mut world::System) -> system::Return {
+fn set_buffers(sys: &mut system::State) -> system::Return {
     system::define!(sys, write![Assets], read![Effect], read![Loop]);
 
     let pipeline = Assets.pipeline.as_mut().ok_or("Pipeline must existed")?;
@@ -176,7 +176,7 @@ fn set_buffers(sys: &mut world::System) -> system::Return {
     return system::OK;
 }
 
-fn render_background(sys: &mut world::System) -> system::Return {
+fn render_background(sys: &mut system::State) -> system::Return {
     system::define!(sys, write![OpenGL], write![Assets], read![Light]);
 
     let (width, height) = OpenGL.display().window().size();
@@ -230,7 +230,7 @@ fn render_background(sys: &mut world::System) -> system::Return {
     return system::OK;
 }
 
-fn render_effect_back(sys: &mut world::System) -> system::Return {
+fn render_effect_back(sys: &mut system::State) -> system::Return {
     system::define!(sys, write![OpenGL], write![Assets], write![Effect], read![Light]);
 
     render_specific_effect(
@@ -245,7 +245,7 @@ fn render_effect_back(sys: &mut world::System) -> system::Return {
     return system::OK;
 }
 
-fn render_effect_front(sys: &mut world::System) -> system::Return {
+fn render_effect_front(sys: &mut system::State) -> system::Return {
     system::define!(
         sys,
         write![OpenGL],
@@ -501,7 +501,7 @@ u_Origin: [1.0,1.0f32],
     };
 }
 
-fn render_sprite(sys: &mut world::System) -> system::Return {
+fn render_sprite(sys: &mut system::State) -> system::Return {
     system::define!(
         sys,
         write![OpenGL],
@@ -755,7 +755,7 @@ u_Origin: [1.0,1.0f32],
     return system::OK;
 }
 
-fn render_enemy(sys: &mut world::System) -> system::Return {
+fn render_enemy(sys: &mut system::State) -> system::Return {
     system::define!(
         sys,
         write![OpenGL],
@@ -1001,7 +1001,7 @@ fn render_enemy(sys: &mut world::System) -> system::Return {
     return system::OK;
 }
 
-fn render_ui(sys: &mut world::System) -> system::Return {
+fn render_ui(sys: &mut system::State) -> system::Return {
     system::define!(sys, write![Ui], read![Loop]);
 
     let fps = sys.state(&|| (String::new(), 0u8, time::Instant::now()))?;
