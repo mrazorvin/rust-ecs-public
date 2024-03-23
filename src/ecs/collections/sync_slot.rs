@@ -1,5 +1,6 @@
 use super::sync_vec::{SyncVec, ZipRangeIterator};
 use std::{
+    collections::HashSet,
     num::NonZeroU32,
     sync::atomic::{AtomicBool, AtomicU32, AtomicU8, Ordering},
 };
@@ -237,16 +238,29 @@ impl<T> SyncSlotMap<T> {
 
 #[test]
 fn slot_map_async() {
+    use std::collections::HashSet;
     use std::sync::{Arc, Mutex};
 
+    // The idea behinde this test is to check
+    // if all main features works in multi threads as expected
+    // to check this every operation is delayed by 1 - 2 millisecond
+
+    // 1. Insert 100 items wtih 2 threads in emtpy slot map
+    //    - Syncronization for this part is provided & tested by sync_vec
+    //
+    // 2. Delete inserted items from 2 threads
+    //    - All deleted items must be stored in current keys_store
+    //    - Syncronization for this part is provided & tested by sync_vec
+    //
+
     static slot_map: SyncSlotMap<u32> = SyncSlotMap::new();
-    let vec = Arc::new(Mutex::new(Vec::<u32>::new()));
+    let vec = Arc::new(Mutex::new(HashSet::<u32>::new()));
 
     let vec1 = Arc::clone(&vec);
     let t1 = std::thread::spawn(move || {
         for i in 0..50 {
             std::thread::sleep(std::time::Duration::from_millis(1));
-            vec1.lock().unwrap().push(slot_map.push(i).as_u32());
+            vec1.lock().unwrap().insert(slot_map.push(i).as_u32());
         }
     });
 
@@ -254,14 +268,15 @@ fn slot_map_async() {
     let t2 = std::thread::spawn(move || {
         for i in 50..100 {
             std::thread::sleep(std::time::Duration::from_millis(1));
-            vec2.lock().unwrap().push(slot_map.push(i).as_u32());
+            vec2.lock().unwrap().insert(slot_map.push(i).as_u32());
         }
     });
 
     t1.join().unwrap();
     t2.join().unwrap();
 
-    let expect = vec.lock().unwrap().iter().cloned().collect::<Vec<u32>>();
+    let mut expect = vec.lock().unwrap().iter().cloned().collect::<Vec<u32>>();
+    expect.sort_by_key(|v| *v);
     assert_eq!(expect, (1..101).into_iter().collect::<Vec<u32>>());
     vec.lock().unwrap().clear();
 
@@ -294,7 +309,7 @@ fn slot_map_async() {
     let t1 = std::thread::spawn(move || {
         for i in 0..50 {
             std::thread::sleep(std::time::Duration::from_millis(2));
-            vec1.lock().unwrap().push(slot_map.push(i).as_u32());
+            vec1.lock().unwrap().insert(slot_map.push(i).as_u32());
         }
     });
 
@@ -302,16 +317,144 @@ fn slot_map_async() {
     let t2 = std::thread::spawn(move || {
         for i in 50..100 {
             std::thread::sleep(std::time::Duration::from_millis(2));
-            vec2.lock().unwrap().push(slot_map.push(i).as_u32());
+            vec2.lock().unwrap().insert(slot_map.push(i).as_u32());
         }
     });
 
     t1.join().unwrap();
     t2.join().unwrap();
-    vec.lock().unwrap().sort_by_key(|v| *v);
-    let expect = vec.lock().unwrap().iter().cloned().collect::<Vec<u32>>();
+    let mut expect = vec.lock().unwrap().iter().cloned().collect::<Vec<u32>>();
+    expect.sort_by_key(|v| *v);
     assert_eq!(expect.len(), 100);
     assert_eq!(expect, (1..101).into_iter().collect::<Vec<u32>>());
+
+    let mut expected = Vec::new();
+    for chunk in slot_map.slots.chunks() {
+        for i in 0..chunk.len() {
+            if chunk[i].0.enabled.load(Ordering::Relaxed) {
+                expected.push(chunk[i].1);
+            }
+        }
+    }
+    expected.sort_by_key(|v| *v);
+    assert_eq!(expected, (0..100u32).into_iter().collect::<Vec<u32>>());
+
+    vec.lock().unwrap().clear();
+
+    let vec1 = Arc::clone(&vec);
+    let t1 = std::thread::spawn(move || {
+        for i in 1..51 {
+            std::thread::sleep(std::time::Duration::from_millis(1));
+            slot_map.delete(unsafe { std::mem::transmute(i) });
+            vec1.lock().unwrap().remove(&unsafe { std::mem::transmute(i as u32) });
+        }
+    });
+
+    let vec2 = Arc::clone(&vec);
+    let t2 = std::thread::spawn(move || {
+        for i in 51..101 {
+            std::thread::sleep(std::time::Duration::from_millis(2));
+            slot_map.delete(unsafe { std::mem::transmute(i) });
+            vec2.lock().unwrap().remove(&unsafe { std::mem::transmute(i as u32) });
+        }
+    });
+    t1.join().unwrap();
+    t2.join().unwrap();
+
+    let expect = vec.lock().unwrap().iter().cloned().collect::<Vec<u32>>();
+    assert_eq!(expect.len(), 0);
+
+    let vec1 = Arc::clone(&vec);
+    let t1 = std::thread::spawn(move || {
+        for i in 0..50 {
+            std::thread::sleep(std::time::Duration::from_millis(2));
+            vec1.lock().unwrap().insert(slot_map.push(i).as_u32());
+        }
+    });
+
+    let vec2 = Arc::clone(&vec);
+    let t2 = std::thread::spawn(move || {
+        for i in 50..100 {
+            std::thread::sleep(std::time::Duration::from_millis(2));
+            vec2.lock().unwrap().insert(slot_map.push(i).as_u32());
+        }
+    });
+
+    t1.join().unwrap();
+    t2.join().unwrap();
+    let mut expect = vec.lock().unwrap().iter().cloned().collect::<Vec<u32>>();
+    expect.sort_by_key(|v| *v);
+
+    assert_eq!(expect.len(), 100);
+    assert_eq!(expect, (1..101).into_iter().collect::<Vec<u32>>());
+
+    let mut expected: HashSet<u32> = HashSet::new();
+    for chunk in slot_map.slots.chunks() {
+        for i in 0..chunk.len() {
+            if chunk[i].0.enabled.load(Ordering::Relaxed) {
+                expected.insert(chunk[i].1);
+            }
+        }
+    }
+    assert_eq!(expected, (0..100u32).into_iter().collect::<HashSet<u32>>());
+    assert_eq!(
+        expect
+            .into_iter()
+            .map(|v| unsafe { slot_map.slots.get_unchecked(v as usize).1 })
+            .collect::<HashSet<u32>>()
+            .difference(&expected)
+            .cloned()
+            .collect::<Vec<u32>>(),
+        Vec::<u32>::new(),
+    );
+
+    let vec1 = Arc::clone(&vec);
+    let t2 = std::thread::spawn(move || {
+        for i in 51..101 {
+            let lock = vec1.lock();
+            std::thread::sleep(std::time::Duration::from_millis(2));
+            slot_map.delete(unsafe { std::mem::transmute(i) });
+            lock.unwrap().remove(&unsafe { std::mem::transmute(i as u32) });
+        }
+    });
+
+    let vec2 = Arc::clone(&vec);
+    let t1 = std::thread::spawn(move || {
+        for i in 100..150 {
+            let lock = vec2.lock();
+            std::thread::sleep(std::time::Duration::from_millis(1));
+            let slot = slot_map.push(i).as_u32();
+            if !lock.unwrap().insert(slot) {
+                panic!("can't insert existed value");
+            }
+        }
+    });
+
+    t1.join().unwrap();
+    t2.join().unwrap();
+    let expect = vec.lock().unwrap().iter().cloned().collect::<Vec<u32>>();
+    assert_eq!(expect.len(), 100);
+
+    let mut contained_items = HashSet::new();
+    for chunk in slot_map.slots.chunks() {
+        for i in 0..chunk.len() {
+            if chunk[i].0.enabled.load(Ordering::Relaxed) {
+                contained_items.insert(chunk[i].1);
+            }
+        }
+    }
+
+    let expection = expect
+        .into_iter()
+        .map(|v| unsafe { slot_map.slots.get_unchecked(v as usize - 1).1 })
+        .collect::<HashSet<u32>>();
+
+    assert_eq!(contained_items.len(), 100);
+    assert_eq!(expection.len(), contained_items.len());
+    assert_eq!(
+        expection.difference(&contained_items).cloned().collect::<Vec<u32>>(),
+        Vec::<u32>::new()
+    );
 }
 
 #[test]
