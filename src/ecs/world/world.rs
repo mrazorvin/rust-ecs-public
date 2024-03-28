@@ -11,6 +11,8 @@ use std::{
 };
 
 use crate::ecs::{
+    collections::sync_slot::SyncSlotMap,
+    components::ComponetsTimers,
     ecs_mode,
     system::{self, sys_mode, Stage, SystemResult, OK},
 };
@@ -159,7 +161,9 @@ impl Scheduler {
     }
 }
 
-pub struct Shared {}
+pub struct Shared {
+    timers: ComponetsTimers,
+}
 
 // parts of world which could be modified only in single thread mode
 pub struct Exclusive {
@@ -194,7 +198,7 @@ impl Default for State<ecs_mode::Exclusive> {
                 scheduler: Scheduler { stages: SchedulerStages::new() },
                 systems: Default::default(),
             }),
-            shared: Shared {},
+            shared: Shared { timers: ComponetsTimers::new() },
             _marker: PhantomData {},
         }
     }
@@ -211,6 +215,14 @@ impl Deref for State<ecs_mode::Exclusive> {
 impl DerefMut for State<ecs_mode::Exclusive> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.exclusive.get_mut()
+    }
+}
+
+impl Deref for State<ecs_mode::Shared> {
+    type Target = Shared;
+
+    fn deref(&self) -> &Self::Target {
+        &self.shared
     }
 }
 
@@ -427,6 +439,14 @@ impl Deref for World<ecs_mode::Exclusive> {
 impl DerefMut for World<ecs_mode::Exclusive> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         unsafe { &mut *self.state }
+    }
+}
+
+impl Deref for World<ecs_mode::Shared> {
+    type Target = State<ecs_mode::Shared>;
+
+    fn deref(&self) -> &Self::Target {
+        unsafe { &*self.state }
     }
 }
 

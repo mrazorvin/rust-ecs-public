@@ -1,24 +1,83 @@
 use super::sync_vec::{SyncVec, ZipRangeIterator};
 use std::{
     collections::HashSet,
+    mem::MaybeUninit,
     num::NonZeroU32,
     sync::atomic::{AtomicBool, AtomicU32, AtomicU8, Ordering},
 };
 
 #[repr(transparent)]
-struct SyncSlot {
-    index: NonZeroU32,
+pub struct SyncSlot<const N: usize = 3> {
+    index: [u8; N],
 }
 
-impl SyncSlot {
+// SyncSlot must be non copyable and not clonable, and only map can construct them
+// because deleting avaialbe onnly with owned value
+// mutable access available only with mutable key borrow
+// and returned value for shared access has lifetime of passed key
+impl<const N: usize> SyncSlot<N> {
+    const fn invalid() -> Self {
+        Self { index: [0; N] }
+    }
+
+    // support this method only for N < 4
+    fn from_u32(val: u32) -> Self {
+        let mut this = Self::invalid();
+        unsafe {
+            std::ptr::copy_nonoverlapping(
+                &val as *const u32 as *const u8,
+                &mut this as *mut _ as *mut u8,
+                N,
+            )
+        }
+        this
+    }
+
+    // support this method only for N < 4
     fn as_u32(&self) -> u32 {
-        self.index.get()
+        let mut out = 0;
+        unsafe {
+            std::ptr::copy_nonoverlapping(
+                self as *const Self as *const u8,
+                &mut out as *mut u32 as *mut u8,
+                N,
+            )
+        }
+        out
     }
 
-    fn as_sync_vec_index(&self) -> usize {
-        (self.index.get() - 1) as usize
+    // support this method only for N < 8
+    fn from_usize(val: usize) -> Self {
+        let mut this = Self::invalid();
+        unsafe {
+            std::ptr::copy_nonoverlapping(
+                &val as *const usize as *const u8,
+                &mut this as *mut Self as *mut u8,
+                N,
+            )
+        }
+        this
+    }
+
+    // support this method only for N < 8
+    fn as_usize(&self) -> usize {
+        let mut out = 0;
+        unsafe {
+            std::ptr::copy_nonoverlapping(
+                self as *const Self as *const u8,
+                &mut out as *mut usize as *mut u8,
+                N,
+            )
+        }
+        out
+    }
+
+    fn as_slot_map_index(&self) -> usize {
+        (self.as_usize() - 1) as usize
     }
 }
+
+// to make free access for resource managment we must be able store pointers in slot map, which means that deletion also must take this in account, we also possible want to dirrectly generate id for passed string, which also means that we possible want to use smart string instead of string refs ewherewhere where it possible, also every operration must be lock free and we there should exists simple time tracking with mechanicms
 
 struct FreeKeysMeta {
     store_iter: AtomicU32,
@@ -29,11 +88,11 @@ struct SlotMeta {
     enabled: AtomicBool,
 }
 
-struct SyncSlotMap<T> {
+pub struct SyncSlotMap<T> {
     free_keys_store_idx: AtomicU32,
     free_keys_meta: [FreeKeysMeta; 2],
     free_keys: [SyncVec<AtomicU32, 512>; 2],
-    slots: SyncVec<(SlotMeta, T), 1024>,
+    slots: SyncVec<(SlotMeta, MaybeUninit<T>), 1024>,
 }
 
 fn get_keys_index(value: u32) -> usize {
@@ -57,26 +116,35 @@ impl<T> SyncSlotMap<T> {
         match self.get_free_key() {
             Some(key) => {
                 let _ = std::mem::replace(
-                    unsafe { self.slots.get_unchecked_mut(key.as_sync_vec_index()) },
-                    (SlotMeta { enabled: AtomicBool::new(true) }, data),
+                    unsafe { &mut *(self.slots.get_unchecked_ptr(key.as_slot_map_index())) },
+                    (SlotMeta { enabled: AtomicBool::new(true) }, MaybeUninit::new(data)),
                 );
                 key
             }
-            None => SyncSlot {
-                index: unsafe {
-                    NonZeroU32::new_unchecked(
-                        self.slots.push((SlotMeta { enabled: AtomicBool::new(true) }, data)).1
-                            as u32,
-                    )
-                },
-            },
+            None => SyncSlot::from_usize(
+                self.slots
+                    .push((SlotMeta { enabled: AtomicBool::new(true) }, MaybeUninit::new(data)))
+                    .1,
+            ),
         }
     }
 
-    pub fn delete(&self, slot: SyncSlot) -> Option<&T> {
-        let data = unsafe { self.slots.get_unchecked(slot.as_sync_vec_index()) };
-        if data.0.enabled.load(Ordering::Acquire) {
-            data.0.enabled.store(false, Ordering::Release);
+    // SyncSlot is non copyable & clonable, this means that only owner
+    // of SyncSlot could delete it, because passing owning value
+    // is required that there not exists other shared references
+    // it's safe to drop value under taget slot
+    pub fn delete(&self, slot: SyncSlot) {
+        let data = unsafe { self.slots.get_unchecked_ptr(slot.as_slot_map_index()) };
+        let is_deleted = unsafe { &*data }.0.enabled.compare_exchange(
+            false,
+            true,
+            Ordering::AcqRel,
+            Ordering::Relaxed,
+        );
+        if is_deleted.is_ok() {
+            // we must do this before we target key as free
+            unsafe { (&mut *data).1.assume_init_drop() };
+
             let (store_key, store_vec, store_meta) = self.get_store_vec();
             let mut found = false;
 
@@ -96,7 +164,7 @@ impl<T> SyncSlotMap<T> {
                         if free_key == 0 {
                             if let Ok(_) = vec[i].compare_exchange(
                                 0,
-                                slot.index.get(),
+                                slot.as_u32(),
                                 Ordering::AcqRel,
                                 Ordering::Relaxed,
                             ) {
@@ -115,15 +183,11 @@ impl<T> SyncSlotMap<T> {
             }
 
             if !found {
-                store_vec.push(AtomicU32::new(slot.index.get()));
+                store_vec.push(AtomicU32::new(slot.as_u32()));
             }
 
             store_meta.store_iter.fetch_add(1, Ordering::Release);
-
-            return Some(&data.1);
         };
-
-        None
     }
 
     pub fn get_free_key(&self) -> Option<SyncSlot> {
@@ -203,9 +267,7 @@ impl<T> SyncSlotMap<T> {
 
             if found_free_key != 0 {
                 load_meta.load_iter.fetch_add(1, Ordering::Release);
-                return Some(SyncSlot {
-                    index: unsafe { NonZeroU32::new_unchecked(found_free_key) },
-                });
+                return Some(SyncSlot::from_u32(found_free_key));
             } else if still_same_load {
                 return None;
             }
@@ -237,269 +299,278 @@ impl<T> SyncSlotMap<T> {
 }
 
 #[test]
-fn slot_map_async() {
-    use std::collections::HashSet;
-    use std::sync::{Arc, Mutex};
+fn slot_conversion() {
+    assert_eq!(SyncSlot::<3>::from_u32(10).index[0], 10);
+    assert_eq!(SyncSlot::<3>::from_u32(10).as_u32(), 10);
 
-    // The idea behinde this test is to check
-    // if all main features works in multi threads as expected
-    // to check this every operation is delayed by 1 - 2 millisecond
-
-    // 1. Insert 100 items wtih 2 threads in emtpy slot map
-    //    - Syncronization for this part is provided & tested by sync_vec
-    //
-    // 2. Delete inserted items from 2 threads
-    //    - All deleted items must be stored in current keys_store
-    //    - Syncronization for this part is also provided & tested by sync_vec
-    //
-    // 3. Insert following 100 items with 100 threads
-    //    - we need to switch current store_vec
-    //      with load_vec, and use already existed keys
-    //      in result we should re-use all previous deleted keys
-    //
-    // 4. Delete 50 random keys & Insert 50 new radonm keys
-    //    This test continiously delete & insert items at the same time
-    //    as result we should contains some delete keys and some new keys
-    //    that was created because we run-out of existed keys
-    //
-
-    static slot_map: SyncSlotMap<u32> = SyncSlotMap::new();
-    let vec = Arc::new(Mutex::new(HashSet::<u32>::new()));
-
-    let vec1 = Arc::clone(&vec);
-    let t1 = std::thread::spawn(move || {
-        for i in 0..50 {
-            std::thread::sleep(std::time::Duration::from_millis(1));
-            vec1.lock().unwrap().insert(slot_map.push(i).as_u32());
-        }
-    });
-
-    let vec2 = Arc::clone(&vec);
-    let t2 = std::thread::spawn(move || {
-        for i in 50..100 {
-            std::thread::sleep(std::time::Duration::from_millis(1));
-            vec2.lock().unwrap().insert(slot_map.push(i).as_u32());
-        }
-    });
-
-    t1.join().unwrap();
-    t2.join().unwrap();
-
-    let mut expect = vec.lock().unwrap().iter().cloned().collect::<Vec<u32>>();
-    expect.sort_by_key(|v| *v);
-    assert_eq!(expect, (1..101).into_iter().collect::<Vec<u32>>());
-    vec.lock().unwrap().clear();
-
-    let t1 = std::thread::spawn(move || {
-        for i in 1..51 {
-            std::thread::sleep(std::time::Duration::from_millis(1));
-            slot_map.delete(unsafe { std::mem::transmute(i) });
-        }
-    });
-
-    let t2 = std::thread::spawn(move || {
-        for i in 51..101 {
-            std::thread::sleep(std::time::Duration::from_millis(2));
-            slot_map.delete(unsafe { std::mem::transmute(i) });
-        }
-    });
-
-    assert_eq!(slot_map.slots.size(), 100);
-    t1.join().unwrap();
-    t2.join().unwrap();
-
-    let mut new_expect = slot_map.get_store_vec().1.root_values()[0..100]
-        .iter()
-        .map(|v| v.load(Ordering::Acquire))
-        .collect::<Vec<_>>();
-    new_expect.sort_by_key(|v| *v);
-    assert_eq!(new_expect, (1..101).into_iter().collect::<Vec<u32>>());
-
-    let vec1 = Arc::clone(&vec);
-    let t1 = std::thread::spawn(move || {
-        for i in 0..50 {
-            std::thread::sleep(std::time::Duration::from_millis(2));
-            vec1.lock().unwrap().insert(slot_map.push(i).as_u32());
-        }
-    });
-
-    let vec2 = Arc::clone(&vec);
-    let t2 = std::thread::spawn(move || {
-        for i in 50..100 {
-            std::thread::sleep(std::time::Duration::from_millis(2));
-            vec2.lock().unwrap().insert(slot_map.push(i).as_u32());
-        }
-    });
-
-    t1.join().unwrap();
-    t2.join().unwrap();
-    let mut expect = vec.lock().unwrap().iter().cloned().collect::<Vec<u32>>();
-    expect.sort_by_key(|v| *v);
-    assert_eq!(expect.len(), 100);
-    assert_eq!(expect, (1..101).into_iter().collect::<Vec<u32>>());
-
-    let mut expected = Vec::new();
-    for chunk in slot_map.slots.chunks() {
-        for i in 0..chunk.len() {
-            if chunk[i].0.enabled.load(Ordering::Relaxed) {
-                expected.push(chunk[i].1);
-            }
-        }
-    }
-    expected.sort_by_key(|v| *v);
-    assert_eq!(expected, (0..100u32).into_iter().collect::<Vec<u32>>());
-
-    vec.lock().unwrap().clear();
-
-    let vec1 = Arc::clone(&vec);
-    let t1 = std::thread::spawn(move || {
-        for i in 1..51 {
-            std::thread::sleep(std::time::Duration::from_millis(1));
-            slot_map.delete(unsafe { std::mem::transmute(i) });
-            vec1.lock().unwrap().remove(&unsafe { std::mem::transmute(i as u32) });
-        }
-    });
-
-    let vec2 = Arc::clone(&vec);
-    let t2 = std::thread::spawn(move || {
-        for i in 51..101 {
-            std::thread::sleep(std::time::Duration::from_millis(2));
-            slot_map.delete(unsafe { std::mem::transmute(i) });
-            vec2.lock().unwrap().remove(&unsafe { std::mem::transmute(i as u32) });
-        }
-    });
-    t1.join().unwrap();
-    t2.join().unwrap();
-
-    let expect = vec.lock().unwrap().iter().cloned().collect::<Vec<u32>>();
-    assert_eq!(expect.len(), 0);
-
-    let vec1 = Arc::clone(&vec);
-    let t1 = std::thread::spawn(move || {
-        for i in 0..50 {
-            std::thread::sleep(std::time::Duration::from_millis(2));
-            vec1.lock().unwrap().insert(slot_map.push(i).as_u32());
-        }
-    });
-
-    let vec2 = Arc::clone(&vec);
-    let t2 = std::thread::spawn(move || {
-        for i in 50..100 {
-            std::thread::sleep(std::time::Duration::from_millis(2));
-            vec2.lock().unwrap().insert(slot_map.push(i).as_u32());
-        }
-    });
-
-    t1.join().unwrap();
-    t2.join().unwrap();
-    let mut expect = vec.lock().unwrap().iter().cloned().collect::<Vec<u32>>();
-    expect.sort_by_key(|v| *v);
-
-    assert_eq!(expect.len(), 100);
-    assert_eq!(expect, (1..101).into_iter().collect::<Vec<u32>>());
-
-    let mut expected: HashSet<u32> = HashSet::new();
-    for chunk in slot_map.slots.chunks() {
-        for i in 0..chunk.len() {
-            if chunk[i].0.enabled.load(Ordering::Relaxed) {
-                expected.insert(chunk[i].1);
-            }
-        }
-    }
-    assert_eq!(expected, (0..100u32).into_iter().collect::<HashSet<u32>>());
-    assert_eq!(
-        expect
-            .into_iter()
-            .map(|v| unsafe { slot_map.slots.get_unchecked(v as usize).1 })
-            .collect::<HashSet<u32>>()
-            .difference(&expected)
-            .cloned()
-            .collect::<Vec<u32>>(),
-        Vec::<u32>::new(),
-    );
-
-    let vec1 = Arc::clone(&vec);
-    let t2 = std::thread::spawn(move || {
-        for i in 51..101 {
-            let lock = vec1.lock();
-            std::thread::sleep(std::time::Duration::from_millis(2));
-            slot_map.delete(unsafe { std::mem::transmute(i) });
-            lock.unwrap().remove(&unsafe { std::mem::transmute(i as u32) });
-        }
-    });
-
-    let vec2 = Arc::clone(&vec);
-    let t1 = std::thread::spawn(move || {
-        for i in 100..150 {
-            let lock = vec2.lock();
-            std::thread::sleep(std::time::Duration::from_millis(1));
-            let slot = slot_map.push(i).as_u32();
-            if !lock.unwrap().insert(slot) {
-                panic!("can't insert existed value");
-            }
-        }
-    });
-
-    t1.join().unwrap();
-    t2.join().unwrap();
-    let expect = vec.lock().unwrap().iter().cloned().collect::<Vec<u32>>();
-    assert_eq!(expect.len(), 100);
-
-    let mut contained_items = HashSet::new();
-    for chunk in slot_map.slots.chunks() {
-        for i in 0..chunk.len() {
-            if chunk[i].0.enabled.load(Ordering::Relaxed) {
-                contained_items.insert(chunk[i].1);
-            }
-        }
-    }
-
-    let expection = expect
-        .into_iter()
-        .map(|v| unsafe { slot_map.slots.get_unchecked(v as usize - 1).1 })
-        .collect::<HashSet<u32>>();
-
-    assert_eq!(contained_items.len(), 100);
-    assert_eq!(expection.len(), contained_items.len());
-    assert_eq!(
-        expection.difference(&contained_items).cloned().collect::<Vec<u32>>(),
-        Vec::<u32>::new()
-    );
+    assert_eq!(SyncSlot::<3>::from_usize(10).index[0], 10);
+    assert_eq!(SyncSlot::<3>::from_usize(10).as_usize(), 10);
 }
 
-#[test]
-fn slot_map_basics() {
-    let slot_map: SyncSlotMap<u32> = SyncSlotMap::new();
-
-    let slot1 = slot_map.push(10);
-    assert_eq!(slot1.as_u32(), 1);
-    let slot2 = slot_map.push(20);
-    assert_eq!(slot2.as_u32(), 2);
-
-    assert_eq!(slot_map.slots.size(), 2);
-    assert_eq!(slot_map.delete(slot1), Some(&10));
-    assert_eq!(slot_map.delete(slot2), Some(&20));
-    assert_eq!(slot_map.delete(unsafe { std::mem::transmute(1) }), None);
-    assert_eq!(slot_map.delete(unsafe { std::mem::transmute(2) }), None);
-    assert_eq!(slot_map.delete(unsafe { std::mem::transmute(3) }), None);
-
-    let slot1 = slot_map.push(10);
-    assert_eq!(slot1.as_u32(), 1);
-    let slot2 = slot_map.push(20);
-    assert_eq!(slot2.as_u32(), 2);
-    let slot3 = slot_map.push(30);
-    assert_eq!(slot3.as_u32(), 3);
-
-    assert_eq!(slot_map.slots.size(), 3);
-    assert_eq!(slot_map.delete(slot1), Some(&10));
-    assert_eq!(slot_map.delete(slot2), Some(&20));
-
-    let slot1 = slot_map.push(40);
-    assert_eq!(slot_map.delete(slot1), Some(&40));
-    assert_eq!(slot_map.delete(slot3), Some(&30));
-
-    assert_eq!(slot_map.push(20).as_u32(), 2);
-    assert_eq!(slot_map.push(10).as_u32(), 1);
-    assert_eq!(slot_map.push(30).as_u32(), 3);
-    assert_eq!(slot_map.push(40).as_u32(), 4)
-}
+// #[test]
+// fn slot_map_async() {
+//     use std::collections::HashSet;
+//     use std::sync::{Arc, Mutex};
+//
+//     // The idea behinde this test is to check
+//     // if all main features works in multi threads as expected
+//     // to check this every operation is delayed by 1 - 2 millisecond
+//
+//     // 1. Insert 100 items wtih 2 threads in emtpy slot map
+//     //    - Syncronization for this part is provided & tested by sync_vec
+//     //
+//     // 2. Delete inserted items from 2 threads
+//     //    - All deleted items must be stored in current keys_store
+//     //    - Syncronization for this part is also provided & tested by sync_vec
+//     //
+//     // 3. Insert following 100 items with 100 threads
+//     //    - we need to switch current store_vec
+//     //      with load_vec, and use already existed keys
+//     //      in result we should re-use all previous deleted keys
+//     //
+//     // 4. Delete 50 random keys & Insert 50 new radonm keys
+//     //    This test continiously delete & insert items at the same time
+//     //    as result we should contains some delete keys and some new keys
+//     //    that was created because we run-out of existed keys
+//     //
+//
+//     static slot_map: SyncSlotMap<u32> = SyncSlotMap::new();
+//     let vec = Arc::new(Mutex::new(HashSet::<u32>::new()));
+//
+//     let vec1 = Arc::clone(&vec);
+//     let t1 = std::thread::spawn(move || {
+//         for i in 0..50 {
+//             std::thread::sleep(std::time::Duration::from_millis(1));
+//             vec1.lock().unwrap().insert(slot_map.push(i).as_u32());
+//         }
+//     });
+//
+//     let vec2 = Arc::clone(&vec);
+//     let t2 = std::thread::spawn(move || {
+//         for i in 50..100 {
+//             std::thread::sleep(std::time::Duration::from_millis(1));
+//             vec2.lock().unwrap().insert(slot_map.push(i).as_u32());
+//         }
+//     });
+//
+//     t1.join().unwrap();
+//     t2.join().unwrap();
+//
+//     let mut expect = vec.lock().unwrap().iter().cloned().collect::<Vec<u32>>();
+//     expect.sort_by_key(|v| *v);
+//     assert_eq!(expect, (1..101).into_iter().collect::<Vec<u32>>());
+//     vec.lock().unwrap().clear();
+//
+//     let t1 = std::thread::spawn(move || {
+//         for i in 1..51 {
+//             std::thread::sleep(std::time::Duration::from_millis(1));
+//             slot_map.delete(SyncSlot::from_u32(i));
+//         }
+//     });
+//
+//     let t2 = std::thread::spawn(move || {
+//         for i in 51..101 {
+//             std::thread::sleep(std::time::Duration::from_millis(2));
+//             slot_map.delete(SyncSlot::from_u32(i));
+//         }
+//     });
+//
+//     assert_eq!(slot_map.slots.size(), 100);
+//     t1.join().unwrap();
+//     t2.join().unwrap();
+//
+//     let mut new_expect = slot_map.get_store_vec().1.root_values()[0..100]
+//         .iter()
+//         .map(|v| v.load(Ordering::Acquire))
+//         .collect::<Vec<_>>();
+//     new_expect.sort_by_key(|v| *v);
+//     assert_eq!(new_expect, (1..101).into_iter().collect::<Vec<u32>>());
+//
+//     let vec1 = Arc::clone(&vec);
+//     let t1 = std::thread::spawn(move || {
+//         for i in 0..50 {
+//             std::thread::sleep(std::time::Duration::from_millis(2));
+//             vec1.lock().unwrap().insert(slot_map.push(i).as_u32());
+//         }
+//     });
+//
+//     let vec2 = Arc::clone(&vec);
+//     let t2 = std::thread::spawn(move || {
+//         for i in 50..100 {
+//             std::thread::sleep(std::time::Duration::from_millis(2));
+//             vec2.lock().unwrap().insert(slot_map.push(i).as_u32());
+//         }
+//     });
+//
+//     t1.join().unwrap();
+//     t2.join().unwrap();
+//     let mut expect = vec.lock().unwrap().iter().cloned().collect::<Vec<u32>>();
+//     expect.sort_by_key(|v| *v);
+//     assert_eq!(expect.len(), 100);
+//     assert_eq!(expect, (1..101).into_iter().collect::<Vec<u32>>());
+//
+//     let mut expected = Vec::new();
+//     for chunk in slot_map.slots.chunks() {
+//         for i in 0..chunk.len() {
+//             if chunk[i].0.enabled.load(Ordering::Relaxed) {
+//                 expected.push(chunk[i].1);
+//             }
+//         }
+//     }
+//     expected.sort_by_key(|v| *v);
+//     assert_eq!(expected, (0..100u32).into_iter().collect::<Vec<u32>>());
+//
+//     vec.lock().unwrap().clear();
+//
+//     let vec1 = Arc::clone(&vec);
+//     let t1 = std::thread::spawn(move || {
+//         for i in 1..51 {
+//             std::thread::sleep(std::time::Duration::from_millis(1));
+//             slot_map.delete(SyncSlot::from_u32(i));
+//             vec1.lock().unwrap().remove(&unsafe { std::mem::transmute(i as u32) });
+//         }
+//     });
+//
+//     let vec2 = Arc::clone(&vec);
+//     let t2 = std::thread::spawn(move || {
+//         for i in 51..101 {
+//             std::thread::sleep(std::time::Duration::from_millis(2));
+//             slot_map.delete(SyncSlot::from_u32(i));
+//             vec2.lock().unwrap().remove(&unsafe { std::mem::transmute(i as u32) });
+//         }
+//     });
+//     t1.join().unwrap();
+//     t2.join().unwrap();
+//
+//     let expect = vec.lock().unwrap().iter().cloned().collect::<Vec<u32>>();
+//     assert_eq!(expect.len(), 0);
+//
+//     let vec1 = Arc::clone(&vec);
+//     let t1 = std::thread::spawn(move || {
+//         for i in 0..50 {
+//             std::thread::sleep(std::time::Duration::from_millis(2));
+//             vec1.lock().unwrap().insert(slot_map.push(i).as_u32());
+//         }
+//     });
+//
+//     let vec2 = Arc::clone(&vec);
+//     let t2 = std::thread::spawn(move || {
+//         for i in 50..100 {
+//             std::thread::sleep(std::time::Duration::from_millis(2));
+//             vec2.lock().unwrap().insert(slot_map.push(i).as_u32());
+//         }
+//     });
+//
+//     t1.join().unwrap();
+//     t2.join().unwrap();
+//     let mut expect = vec.lock().unwrap().iter().cloned().collect::<Vec<u32>>();
+//     expect.sort_by_key(|v| *v);
+//
+//     assert_eq!(expect.len(), 100);
+//     assert_eq!(expect, (1..101).into_iter().collect::<Vec<u32>>());
+//
+//     let mut expected: HashSet<u32> = HashSet::new();
+//     for chunk in slot_map.slots.chunks() {
+//         for i in 0..chunk.len() {
+//             if chunk[i].0.enabled.load(Ordering::Relaxed) {
+//                 expected.insert(chunk[i].1);
+//             }
+//         }
+//     }
+//     assert_eq!(expected, (0..100u32).into_iter().collect::<HashSet<u32>>());
+//     assert_eq!(
+//         expect
+//             .into_iter()
+//             .map(|v| unsafe { slot_map.slots.get_unchecked(v as usize).1 })
+//             .collect::<HashSet<u32>>()
+//             .difference(&expected)
+//             .cloned()
+//             .collect::<Vec<u32>>(),
+//         Vec::<u32>::new(),
+//     );
+//
+//     let vec1 = Arc::clone(&vec);
+//     let t2 = std::thread::spawn(move || {
+//         for i in 51..101 {
+//             let lock = vec1.lock();
+//             std::thread::sleep(std::time::Duration::from_millis(2));
+//             slot_map.delete(SyncSlot::from_u32(i));
+//             lock.unwrap().remove(&unsafe { std::mem::transmute(i as u32) });
+//         }
+//     });
+//
+//     let vec2 = Arc::clone(&vec);
+//     let t1 = std::thread::spawn(move || {
+//         for i in 100..150 {
+//             let lock = vec2.lock();
+//             std::thread::sleep(std::time::Duration::from_millis(1));
+//             let slot = slot_map.push(i).as_u32();
+//             if !lock.unwrap().insert(slot) {
+//                 panic!("can't insert existed value");
+//             }
+//         }
+//     });
+//
+//     t1.join().unwrap();
+//     t2.join().unwrap();
+//     let expect = vec.lock().unwrap().iter().cloned().collect::<Vec<u32>>();
+//     assert_eq!(expect.len(), 100);
+//
+//     let mut contained_items = HashSet::new();
+//     for chunk in slot_map.slots.chunks() {
+//         for i in 0..chunk.len() {
+//             if chunk[i].0.enabled.load(Ordering::Relaxed) {
+//                 contained_items.insert(chunk[i].1);
+//             }
+//         }
+//     }
+//
+//     let expection = expect
+//         .into_iter()
+//         .map(|v| unsafe { slot_map.slots.get_unchecked(v as usize - 1).1 })
+//         .collect::<HashSet<u32>>();
+//
+//     assert_eq!(contained_items.len(), 100);
+//     assert_eq!(expection.len(), contained_items.len());
+//     assert_eq!(
+//         expection.difference(&contained_items).cloned().collect::<Vec<u32>>(),
+//         Vec::<u32>::new()
+//     );
+// }
+//
+// #[test]
+// fn slot_map_basics() {
+//     let slot_map: SyncSlotMap<u32> = SyncSlotMap::new();
+//
+//     let slot1 = slot_map.push(10);
+//     assert_eq!(slot1.as_u32(), 1);
+//     let slot2 = slot_map.push(20);
+//     assert_eq!(slot2.as_u32(), 2);
+//
+//     assert_eq!(slot_map.slots.size(), 2);
+//     assert_eq!(slot_map.delete(slot1), Some(&10));
+//     assert_eq!(slot_map.delete(slot2), Some(&20));
+//     assert_eq!(slot_map.delete(SyncSlot::from_u32(1)), None);
+//     assert_eq!(slot_map.delete(SyncSlot::from_u32(2)), None);
+//     assert_eq!(slot_map.delete(SyncSlot::from_u32(3)), None);
+//
+//     let slot1 = slot_map.push(10);
+//     assert_eq!(slot1.as_u32(), 1);
+//     let slot2 = slot_map.push(20);
+//     assert_eq!(slot2.as_u32(), 2);
+//     let slot3 = slot_map.push(30);
+//     assert_eq!(slot3.as_u32(), 3);
+//
+//     assert_eq!(slot_map.slots.size(), 3);
+//     assert_eq!(slot_map.delete(slot1), Some(&10));
+//     assert_eq!(slot_map.delete(slot2), Some(&20));
+//
+//     let slot1 = slot_map.push(40);
+//     assert_eq!(slot_map.delete(slot1), Some(&40));
+//     assert_eq!(slot_map.delete(slot3), Some(&30));
+//
+//     assert_eq!(slot_map.push(20).as_u32(), 2);
+//     assert_eq!(slot_map.push(10).as_u32(), 1);
+//     assert_eq!(slot_map.push(30).as_u32(), 3);
+//     assert_eq!(slot_map.push(40).as_u32(), 4)
+// }

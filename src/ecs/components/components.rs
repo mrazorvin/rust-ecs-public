@@ -19,9 +19,6 @@ use std::{
 // this and possible some other functions required
 // additional trait bound than just any
 // for example disposing/is_changed etc...
-
-pub static XX: Vec<TypeId> = Vec::new();
-
 pub static CHANGED_COMPONENTS: SyncVec<TypeId> = SyncVec::new();
 
 pub struct Components<T: Sized> {
@@ -184,6 +181,35 @@ impl<T: ComponnetsResource> world::DisposeFrame for Components<T> {
         true
     }
 }
+
+// struct TimerSlot<const N: usize = 3> {
+//     parts: [u8; N],
+// }
+//
+// #[repr(C)]
+// struct ComponentMeta {
+//     kind: u8,
+//     timer: TimerSlot,
+//     updated: u32,
+// }
+//
+// #[repr(Rust, align(16))]
+// struct Z {
+//     meta: ComponentMeta,
+//     x: bool,
+// }
+//
+// fn main() {
+//     println!("{}", std::mem::size_of::<ComponentMeta>());
+//     println!("{}", std::mem::size_of::<Z>());
+//     println!("{}", unsafe {
+//         std::mem::transmute::<ComponentMeta, u64>(ComponentMeta {
+//             kind: 1,
+//             timer: TimerSlot { parts: [0, 0, 0] },
+//             updated: 0,
+//         })
+//     });
+// }
 
 #[test]
 fn components_dispose() {

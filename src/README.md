@@ -1,16 +1,7 @@
-1. the idea is to make `BucketRefMut` has references to both bitfields:
-    1. bits that describes entity existence 
-    2. bits that describes if entity was updated
-
-    ↓
-
-    3. if bits that describes if entity was updated is null pointer then ignore this operation
-       otherwise process also should update this bits
-    
-    ↓ 
-
-    4. to make both implmentation compatibily bucket creation must be done from extended &(bits, ptr, bits)
-    
-    ↓
-
-    5. this means that we shoud cast short represenation into full representation by adding null pointer to the end of tuple before creating bucket
+1. Add pointer in component to world (probably also iinject world into unique type)
+2. Add slot map with simple timer impl into sahred part of world 
+3. Add method that add timed componentes into the world 
+4. Add entity id component
+5. Add timers iterator 
+6. Add dispose handler that remove entity id with all it's component when it's deleted 
+7. Add Aarch representation with list of attached components 

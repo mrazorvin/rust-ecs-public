@@ -18,16 +18,12 @@ imgui = { version  = "0.11.0", default-features = false }
 hashlink = { version = "0.9.0" }
 basis-universal = "0.3.1"
 nanoserde = "0.1.37"
-quad-snd = "0.2.7"
 nohash-hasher = "=0.2.0"
 
 [dependencies.smallvec]
 version = "1.13.1"
 
 [profile.dev.package."basis-universal-sys"]
-opt-level = 3
-
-[profile.dev.package."quad-snd"]
 opt-level = 3
 
 [target.'cfg(target_os="android")'.dependencies]

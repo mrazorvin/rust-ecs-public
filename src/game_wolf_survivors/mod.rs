@@ -5,7 +5,6 @@ use std::{
 
 use glam::Vec2;
 use glium::{uniform, DrawParameters, Surface};
-use quad_snd::{AudioContext, Sound};
 
 use crate::{
     client::{
@@ -20,7 +19,6 @@ use crate::{
 pub fn start_game() -> Result<(), Box<dyn std::error::Error>> {
     let mut world = world::World::new();
     world.add_unique(Assets::default())?;
-    world.add_unique(Audio { ctx: AudioContext::new() })?;
     world.add_unique(Light { pos: [0.0, 0.0] })?;
     render_loop::render_loop(
         world,
@@ -31,8 +29,12 @@ pub fn start_game() -> Result<(), Box<dyn std::error::Error>> {
 
 impl ComponnetsResource for Sprite {}
 struct Sprite {
+    // smart string
     id: &'static str,
+    // smart string, probably will better to be ansii to store up to 24 characters
+    // or id from string interner, 4 bytes
     kind: &'static str,
+    // smart string
     direction: &'static str,
     pos: Vec2,
 }
@@ -62,11 +64,6 @@ struct Effect {
     pos: Vec2,
 }
 
-impl world::UniqueResource for Audio {}
-struct Audio {
-    ctx: AudioContext,
-}
-
 fn schedule(sys: &mut system::State) -> system::Return {
     system::define!(sys, read![Sprite], {
         if Sprite.len() == 0 {
@@ -86,7 +83,7 @@ fn schedule(sys: &mut system::State) -> system::Return {
 }
 
 fn init(_sys: &mut system::State) -> system::Return {
-    system::define!(_sys, write![OpenGL], write![Sprite], write![Assets], read![Audio]);
+    system::define!(_sys, write![OpenGL], write![Sprite], write![Assets]);
 
     Assets.load_tilemap("forest_map", &mut OpenGL)?;
     Assets.load_sprite("Baenor_Mastersheet_Packed", &mut OpenGL)?;
@@ -96,18 +93,6 @@ fn init(_sys: &mut system::State) -> system::Return {
     Assets.load_sprite("BloodExplosionVFX_Packed", &mut OpenGL)?;
 
     Assets.load_pipeline(&mut OpenGL)?;
-
-    // let mut wav1 = Vec::new();
-    // sdl2::rwops::RWops::from_file("assets/BRPG_Assault_Adventure_Stinger.wav", "r+")?
-    //     .read_to_end(&mut wav1)?;
-    // let sound1 = Sound::load(&Audio.ctx, &wav1);
-    // sound1.play(&Audio.ctx, Default::default());
-
-    let mut wav2 = Vec::new();
-    sdl2::rwops::RWops::from_file("assets/Eclipsed Desolation.ogg", "r+")?
-        .read_to_end(&mut wav2)?;
-    let sound2 = Sound::load(&Audio.ctx, &wav2);
-    sound2.play(&Audio.ctx, quad_snd::PlaySoundParams { looped: true, volume: 0.3 });
 
     Sprite.set(
         1,
@@ -246,29 +231,13 @@ fn render_effect_back(sys: &mut system::State) -> system::Return {
 }
 
 fn render_effect_front(sys: &mut system::State) -> system::Return {
-    system::define!(
-        sys,
-        write![OpenGL],
-        write![Assets],
-        write![Effect],
-        read![Audio],
-        read![Ui],
-        read![Light]
-    );
-    let (ref mut next_id, ref mut time, sound) = sys.state(&|| {
-        let mut wav2 = Vec::new();
-        sdl2::rwops::RWops::from_file("assets/Fire-4.ogg", "r+")
-            .unwrap()
-            .read_to_end(&mut wav2)
-            .unwrap();
-        (2 as u16, Instant::now(), Sound::load(&Audio.ctx, &wav2))
-    })?;
+    system::define!(sys, write![OpenGL], write![Assets], write![Effect], read![Ui], read![Light]);
+    let (ref mut next_id, ref mut time) = sys.state(&|| (2 as u16, Instant::now()))?;
 
     let pos = Ui.io().mouse_pos;
     if Ui.io().mouse_down[1] && time.elapsed().as_millis() > 200 {
         let origin = Vec2::from([128f32, 128f32]);
         *time = Instant::now();
-        sound.play(&Audio.ctx, quad_snd::PlaySoundParams { looped: false, volume: 0.3 });
 
         Effect.set(
             1,
@@ -764,19 +733,11 @@ fn render_enemy(sys: &mut system::State) -> system::Return {
         write![Effect],
         read![Assets],
         read![Loop],
-        read![Audio],
         read![Light]
     );
     use nanorand::{Rng, WyRand};
 
-    let (ref mut random, sound) = sys.state(&|| {
-        let mut wav2 = Vec::new();
-        sdl2::rwops::RWops::from_file("assets/Warg-Death-2.ogg", "r+")
-            .unwrap()
-            .read_to_end(&mut wav2)
-            .unwrap();
-        (Instant::now(), Sound::load(&Audio.ctx, &wav2))
-    })?;
+    let random = sys.state(&|| Instant::now())?;
 
     let origin = Vec2::from([64f32, 96f32]);
 
@@ -860,8 +821,6 @@ fn render_enemy(sys: &mut system::State) -> system::Return {
                     sprite.push = Some(target.normalize() * -10f32);
                     sprite.dead = Some(Instant::now());
                     sprite.kind = "death";
-                    sound
-                        .play(&Audio.ctx, quad_snd::PlaySoundParams { looped: false, volume: 0.3 });
                 }
 
                 query!(Effect[&effect], |_| {
@@ -883,10 +842,6 @@ fn render_enemy(sys: &mut system::State) -> system::Return {
                             let y = rng.generate_range(0u8..=20);
                             sprite.dead = Some(Instant::now());
                             sprite.kind = "death";
-                            sound.play(
-                                &Audio.ctx,
-                                quad_snd::PlaySoundParams { looped: false, volume: 0.3 },
-                            );
                             unsafe {
                                 Effect.try_set(
                                     5,

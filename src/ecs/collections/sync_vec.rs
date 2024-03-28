@@ -114,27 +114,11 @@ impl<T, const N: usize> SyncVec<T, N> {
 
     #[inline]
     pub unsafe fn get_unchecked(&self, index: usize) -> &T {
-        if index < N {
-            unsafe {
-                return (*self.root_chunk.values.get()).get_unchecked(index).assume_init_ref();
-            };
-        }
-
-        let mut chunk = &self.root_chunk;
-        let mut len = chunk.len.load(Ordering::Acquire) as usize;
-        let mut chunk_idx = 0;
-        while len >= N && index >= (len + N * chunk_idx) {
-            let chunk_ptr = chunk.next.load(Ordering::Acquire);
-            chunk = unsafe { &*chunk_ptr };
-            chunk_idx += 1;
-            len = chunk.raw_len.load(Ordering::Acquire) as usize
-        }
-
-        unsafe { (*chunk.values.get()).get_unchecked(index % N).assume_init_ref() }
+        unsafe { &*self.get_unchecked_ptr(index) }
     }
 
     #[inline]
-    pub unsafe fn get_unchecked_mut(&self, index: usize) -> &mut T {
+    pub unsafe fn get_unchecked_ptr(&self, index: usize) -> *mut T {
         if index < N {
             unsafe {
                 return (*self.root_chunk.values.get()).get_unchecked_mut(index).assume_init_mut();
