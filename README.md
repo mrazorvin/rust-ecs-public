@@ -1,9 +1,5 @@
 # ECS
 
-## Docs
-
-- Basic info about currently implemneted pattern, features and concepts: https://docs.google.com/spreadsheets/d/1Zp1RSgAQ-T9jpHwEgUBQo5P1c1JHqDf30X_3NDAJFqU/edit#gid=0
-
 ## Commands
 
 - Build    - `cargo run --features release`
@@ -30,20 +26,3 @@
 ```sh
 cargo run --example wolf_survivors --features=pc
 ```
-
-## Android
-
-```
-cd C:\Users\Admin\Documents\MEGA\rust-ecs
-$Env:SDL="C:\Users\Admin\Documents\MEGA\SDL"
-
-
-$Env:ANDROID_HOME="C:\Users\Admin\AppData\Local\Android\Sdk"
-$Env:ANDROID_NDK_HOME="C:\Users\Admin\Documents\MEGA\Android_NDK" 
-$Env:AR_aarch64_linux_android="C:\\Users\\Admin\\Documents\\MEGA\\Android_NDK\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\llvm-ar.exe" 
-$Env:CC_aarch64_linux_android="C:\\Users\\Admin\\Documents\\MEGA\\Android_NDK\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\aarch64-linux-android24-clang.cmd"
-$Env:CXX_aarch64_linux_android="C:\\Users\\Admin\\Documents\\MEGA\\Android_NDK\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\aarch64-linux-android24-clang++.cmd"
-
-```
-
-
