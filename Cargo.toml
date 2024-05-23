@@ -13,7 +13,7 @@ libc-strftime = "0.2.0"
 nanorand = "0.7.0"
 bumpalo = { version = "3.14.0", features = ["boxed"] }
 sdl2 = { version = "0.36.0" }
-glium = { path = "../glium", features = [], default-features = false } 
+glium = { features = [], default-features = false } 
 imgui = { version  = "0.11.0", default-features = false }
 hashlink = { version = "0.9.0" }
 basis-universal = "0.3.1"
