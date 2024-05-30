@@ -2,6 +2,8 @@
 
 A simple ECS-based 2D game engine created from scratch, compatible with Android, Windows, and Linux.
 
+![Wolf survivors](example.gif)
+
 ### Features:
 - **Hybrid Sparse | Arch based ECS**:
   - Concurrent rotation logging for logs and metrics
